@@ -75,6 +75,7 @@ class MCQExportRequest(BaseModel):
 
 
 # --- Health & Root ---
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
     return {
