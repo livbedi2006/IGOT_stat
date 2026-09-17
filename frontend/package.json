@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "tunnel": "localtunnel --port 5173 --local-host 127.0.0.1",
     "start": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
     "lint": "oxlint",

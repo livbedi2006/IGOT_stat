@@ -348,6 +348,27 @@ npm run dev -- --host 127.0.0.1 --port 5173
 
 ---
 
+### 🌐 Public Internet & Multi-Device Access
+
+To share the application with external evaluators, access it on mobile devices, or present from any network without port forwarding:
+
+#### 1. Public HTTPS Tunnel (Zero-Configuration)
+In `frontend/`:
+```bash
+npm run tunnel
+```
+This spawns a secure HTTPS tunnel mapped directly to the Vite dev server with reverse-proxied FastAPI endpoints (`/api/...`).
+- When prompted for the tunnel password on first open, enter your host public IP (check via `curl ifconfig.me`).
+
+#### 2. Local Wi-Fi / LAN Access
+Since the Vite server listens on `0.0.0.0`, any device on the same local network (phone, tablet, colleague's laptop) can open:
+```
+http://<YOUR_LOCAL_IP>:5173/
+```
+(e.g., `http://10.111.230.21:5173/`). Every device gets an onboarding prompt to set their own Cadre and Officer Name dynamically.
+
+---
+
 ## 🐳 Docker Quick Start
 
 Run the entire platform (PostgreSQL, Redis, FastAPI Backend, and Frontend) in isolated Docker containers:
