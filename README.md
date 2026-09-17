@@ -13,133 +13,104 @@
 ---
 
 ## 📋 Table of Contents
-1. [Executive Summary](#-executive-summary)
+1. [Project Purpose & Vision](#-project-purpose--vision)
 2. [Problem Statement & Background](#-problem-statement--background)
-3. [Our Solution & Key Innovations](#-our-solution--key-innovations)
-4. [User Personas & Supported Cadres](#-user-personas--supported-cadres)
+3. [Key Features & Innovations](#-key-features--innovations)
+4. [User Personas & Role Descriptions](#-user-personas--role-descriptions)
 5. [System Architecture](#-system-architecture)
 6. [Machine Learning Core: Zero Overfitting Guarantee](#-machine-learning-core-zero-overfitting-guarantee)
-7. [STATWISE Screenbook & UI Specification](#-statwise-screenbook--ui-specification)
-8. [End-to-End Demo Flow](#-end-to-end-demo-flow)
-9. [API Gateway Documentation](#-api-gateway-documentation)
-10. [Quick Start Guide](#-quick-start-guide)
-11. [Docker & Production Deployment](#-docker--production-deployment)
-12. [Testing & Quality Assurance](#-testing--quality-assurance)
-13. [Security & Statutory Compliance](#-security--statutory-compliance)
-14. [Repository Structure](#-repository-structure)
-15. [Team & Acknowledgments](#-team--acknowledgments)
+7. [STATWISE Screenbook UI Design System](#-statwise-screenbook-ui-design-system)
+8. [Best Final-Demo Flow](#-best-final-demo-flow)
+9. [Integration Disclaimer](#-integration-disclaimer)
+10. [Quick Start Guide (Windows, macOS, Linux)](#-quick-start-guide)
+11. [Docker Quick Start](#-docker-quick-start)
+12. [Environment Variables Reference](#-environment-variables-reference)
+13. [API Gateway Documentation](#-api-gateway-documentation)
+14. [Testing & Quality Assurance](#-testing--quality-assurance)
+15. [Security & Statutory Compliance](#-security--statutory-compliance)
+16. [Troubleshooting](#-troubleshooting)
+17. [Repository Structure](#-repository-structure)
+18. [Team & Acknowledgments](#-team--acknowledgments)
 
 ---
 
-## 🏛️ Executive Summary
+## 🏛️ Project Purpose & Vision
 
-This repository delivers **STATWISE**, the AI-enabled Skill Intelligence and Learning Platform engineered for the **Ministry of Statistics and Programme Implementation (MoSPI)** to address **Problem Statement ID: 26101** in **Smart India Hackathon 2026**.
+**STATWISE** is an AI-enabled Skill Intelligence and Learning Platform engineered specifically for India's Official Statistical System under the **Ministry of Statistics and Programme Implementation (MoSPI)** to address **Problem Statement ID: 26101** in **Smart India Hackathon 2026**.
 
 ### Vision Statement
 > *"To create an AI-enabled learning ecosystem that transforms capacity building in India's Official Statistical System by delivering personalized, competency-based learning pathways, automated assessments, and data-driven workforce development insights."*
 
-The platform bridges the critical upskilling challenge faced by **8,000+ statistical officials** (Junior Statistical Officers, Senior Statistical Officers, and Indian Statistical Service Officers) in modern methodologies including **AI, ML, Big Data Analytics, GIS, and Cloud Computing**.
+The platform empowers **8,000+ statistical officials** across India with competency gap analytics, grounded AI assessment generation, personalized blended learning pathways (iGOT + NSSTA/TPAC), AI-proctored exams, grounded statistical tutoring, and predictive workforce analytics.
 
 ---
 
 ## 📌 Problem Statement & Background
 
-India's Official Statistical System collects, compiles, and disseminates national economic indicators (GDP, CPI, IIP, PLFS, ASI). With technological modernization, officers require continuous capacity building, yet face systemic obstacles:
+India's statistical system is undergoing rapid technological modernization with increasing adoption of **AI, ML, Big Data Analytics, GIS, and Cloud Computing**. Officials require continuous upskilling, but face critical challenges:
 - ❌ **No Intelligent Skill-Gap Assessment**: Civil service training lacks statistical domain-specific mapping.
-- ❌ **Course Overload on iGOT Karmayogi**: With 4,600+ courses, officials cannot identify courses aligned with their specific cadre responsibilities.
-- ❌ **Manual Assessment Creation**: Setting exams and quizzes takes 8–10 hours per module.
-- ❌ **Fragmented Ecosystem**: In-person NSSTA workshops, iGOT online courses, and departmental circulars operate in disconnected silos.
+- ❌ **Information Overload on iGOT Karmayogi**: With 4,600+ courses, officials lack intelligent mechanisms to identify courses aligned with their specific job roles and competency gaps.
+- ❌ **Manual Assessment Creation**: Setting training exams takes 8–10 hours per module.
+- ❌ **Fragmented Learning Ecosystem**: In-person NSSTA workshops, iGOT online courses, and departmental circulars operate in disconnected silos.
 
 ---
 
-## 💡 Our Solution & Key Innovations
+## 💡 Key Features & Innovations
 
 | Feature | Technical Innovation | Operational Impact |
 |---|---|---|
-| **Statistics-Specific Competency Framework** | Domain knowledge graph mapping 100+ statistical competencies with DAG prerequisite constraints | Accurate, transparent skill gap calculation (`Gap = Target - Current`) |
-| **Grounded Assessment & MCQ Generation** | NLP document extraction + Bloom's taxonomy classifier + page-level citation validation | Reduces assessment creation time from 8–10 hours to **&lt;5 minutes** |
+| **Statistics-Specific Competency Framework** | Domain knowledge graph mapping 100+ statistical competencies with DAG prerequisite constraints | Transparent, explainable skill gap calculation (`Gap = Target - Current`) |
+| **Grounded Assessment & MCQ Generation** | Document parsing (PDF/PPT/Word) + Bloom's taxonomy classifier + source citation validation | Reduces assessment creation time from 8–10 hours to **&lt;5 minutes** |
 | **Blended Learning Pathways** | Unified sequencing of iGOT digital courses, virtual labs, and NSSTA/TPAC executive workshops | Eliminates platform switching with end-to-end curriculum sequencing |
-| **Zero-Overfitting Machine Learning** | Regularized Ridge regression ($\alpha=0.8685$) with 5-Fold cross-validation for skill forecasting | True generalization on official statistical cadres without high variance |
-| **AI Proctoring System** | Multi-factor sensor fusion (face detection, gaze vector, tab focus, ambient audio spike) | Continuous integrity verification with calibrated $>80\%$ high-risk alerting |
+| **Zero-Overfitting Machine Learning** | Regularized Ridge regression ($\alpha=0.8685$) with 5-Fold cross-validation for skill forecasting | True generalization across official statistical cadres without high variance |
+| **AI Proctoring System** | Multi-factor telemetry (face detection, gaze vector, tab focus, ambient audio spike) | Continuous exam integrity verification with calibrated $>80\%$ high-risk alerting |
 | **MoSPI Virtual Lab (MCP)** | Live synthetic microdata streams (*PLFS*, *CPI*, *IIP*, *ASI*) with auto-graded problem sets | Hands-on data science practice using official statistical standards |
 
 ---
 
-## 👥 User Personas & Supported Cadres
+## 👥 User Personas & Role Descriptions
 
-1. **Statistical Officers (JSO / SSO / ISS)**:
-   - *Needs*: Cadre-specific competencies, prerequisite-ordered learning paths, and verifiable certification.
-   - *Platform Features*: Competency radar chart, personalized pathway, grounded quizzes, and statistical AI tutor.
-2. **Data Analysts & GIS Specialists**:
-   - *Needs*: Hands-on practice with Python, R, SQL, and geospatial microdata.
-   - *Platform Features*: Virtual labs, automated code scoring, and MoSPI MCP synthetic datasets.
-3. **Trainers & Faculty (NSSTA / Department Heads)**:
-   - *Needs*: Rapid assessment generation, progress audits, and question bank export.
-   - *Platform Features*: Assessment Studio, QTI 2.1 / Moodle XML exporter, and Bloom's difficulty tuner.
-4. **HR & Administrators (MoSPI DIID / Training Coordinators)**:
-   - *Needs*: Workforce capability forecasting, training ROI, and departmental gap heatmaps.
-   - *Platform Features*: Admin heatmap, emerging skill forecasts (+42% AI/ML), and ML model diagnostics.
+| Persona | Role Code | Cadre / Department | Key Platform Capabilities |
+|---|---|---|---|
+| **Livjot Singh Bedi** | `JSO` | Junior Statistical Officer (DIID) | Competency radar, top gap analysis, iGOT courses, proctored quizzes |
+| **Field Statistical Officer** | `SSO` | Senior Statistical Officer (FOD) | CAPI quality audit, sampling multipliers, in-person NSSTA workshops |
+| **Data Analyst** | `ANALYST` | Data Informatics & GIS Unit | Hands-on virtual labs, Python/R code execution, microdata practice |
+| **Director / Administrator** | `ISS` | Indian Statistical Service (NAD) | Org-wide heatmaps, emerging skill forecasts (+42% AI/ML), ML diagnostics |
+| **Faculty / Trainer** | `TRAINER` | NSSTA Faculty / DIID | MCQ studio, Bloom's difficulty tuning, QTI 2.1 & Moodle XML export |
 
 ---
 
 ## 🏗️ System Architecture
 
-```mermaid
-graph TD
-    subgraph Client ["Client Presentation Tier (STATWISE Screenbook)"]
-        UI["STATWISE Unified Web App (React 19 + Tailwind CSS)"]
-        V1["01 Overview"]
-        V2["02 Competency Profile"]
-        V3["03 Learning Path"]
-        V4["04 Recommendations"]
-        V5["05 Assessments"]
-        V6["06 Quiz Player"]
-        V7["07 AI Tutor"]
-        V8["08 Admin Analytics"]
-        V9["09 Profile & Settings"]
-        V10["10 Virtual Lab (MCP)"]
-    end
-
-    subgraph Gateway ["API Gateway Tier (FastAPI Async)"]
-        API["FastAPI REST Gateway (Port 8000)"]
-        AUTH["JWT Auth & Role Switcher"]
-        CORS["CORS & Input Validation"]
-    end
-
-    subgraph Services ["Application & ML Services"]
-        COMP["Competency Analytics Service"]
-        MCQ["Grounded MCQ Generator"]
-        REC["Hybrid Recommender Engine"]
-        PROC["AI Proctoring Detector"]
-        TUTOR["MoSPI Knowledge Tutor"]
-        FORECAST["Skill Demand Forecasting Engine"]
-        DATA["MoSPI MCP Datasets Engine"]
-    end
-
-    subgraph DataTier ["Data & Knowledge Tier"]
-        DB[(PostgreSQL / SQLite Storage)]
-        KGRAPH[Competency Prerequisite Graph]
-        DOCS[Official Statistical Manuals]
-        SYNTH[Synthetic Microdata Files]
-    end
-
-    UI --> API
-    API --> AUTH
-    API --> CORS
-    API --> COMP
-    API --> MCQ
-    API --> REC
-    API --> PROC
-    API --> TUTOR
-    API --> FORECAST
-    API --> DATA
-
-    COMP --> KGRAPH
-    REC --> KGRAPH
-    MCQ --> DOCS
-    TUTOR --> DOCS
-    DATA --> SYNTH
-    FORECAST --> DB
+```
+[ Frontend (React 19 + Tailwind CSS) ]
+  ├── 01 Overview (Learner Home)
+  ├── 02 Competency Profile (Radar & Top Gaps)
+  ├── 03 Learning Path (Sequenced Pathway)
+  ├── 04 Recommendations (Explainable iGOT + NSSTA)
+  ├── 05 Assessments (MCQ Studio & Exporters)
+  ├── 06 Quiz Player (Adaptive & AI Proctored)
+  ├── 07 AI Tutor (Source-Grounded RAG)
+  ├── 08 Admin Analytics (Heatmaps & ML Diagnostics)
+  ├── 09 Profile & Settings (DPDP 2023 Controls)
+  └── 10 Virtual Lab (MoSPI MCP Datasets)
+                   │
+                   ▼  HTTPS / REST (JSON)
+[ FastAPI API Gateway (Port 8000) ]
+  ├── JWT Auth & Cadre Switcher
+  ├── Competency Engine (4 Domains, 100+ Skills)
+  ├── Grounded MCQ Generator & Bloom's Classifier
+  ├── Hybrid Recommender Engine (MAUT + DAG Solver)
+  ├── AI Proctoring Anomaly Detector
+  ├── MoSPI Knowledge Tutor Engine
+  └── MoSPI MCP Synthetic Datasets Service
+                   │
+                   ▼
+[ Data & Knowledge Tier ]
+  ├── PostgreSQL 16 / SQLite Relational Store
+  ├── Redis 7 Caching & Task State
+  ├── Official Competency Prerequisite DAG Graph
+  └── MoSPI Official Documentation & Microdata
 ```
 
 ---
@@ -177,7 +148,7 @@ The platform guarantees mathematical soundness and generalizability without over
 
 ---
 
-## 🎨 STATWISE Screenbook & UI Specification
+## 🎨 STATWISE Screenbook UI Design System
 
 The user interface strictly adheres to the official **STATWISE Application Design & Prototype Screenbook**:
 
@@ -190,61 +161,46 @@ The user interface strictly adheres to the official **STATWISE Application Desig
 
 ---
 
-## 🔄 End-to-End Demo Flow
+## 🔄 Best Final-Demo Flow
 
-Following Section 4 of the Screenbook, the recommended evaluation sequence demonstrates the complete capacity-building chain:
+Follow this exact demonstration sequence (Screenbook Section 4) to showcase the complete capacity-building loop:
 
-1. **Official Profile & Readiness**: Open the **Overview (01)** screen as *Livjot Singh Bedi (JSO)* to review readiness (76%) and urgent competency gaps.
-2. **Competency Gap Analysis**: Navigate to **Competency Profile (02)** to inspect the radar chart overlaying current mastery against the official cadre target.
-3. **Personalized Learning Path**: Open **Learning Path (03)** to view the 4-step sequenced curriculum connecting Foundation (iGOT), Core (iGOT), Practice (Virtual Lab), and Advanced (NSSTA TPAC).
-4. **Targeted Course Discovery**: Explore **Recommendations (04)** with filter tabs to review explainable course cards.
-5. **Grounded Question Generation**: In **Assessments (05)**, upload a training document or select an official MoSPI manual (*PLFS Methodology*, *CPI Handbook*) to generate grounded questions with page citations and export to **QTI 2.1**, **Moodle XML**, or **JSON**.
-6. **Adaptive Proctored Quiz**: Take the quiz in **Quiz Player (06)** while monitoring live AI proctoring telemetry (`AI Proctor: Normal 99% Integrity`). Submit to receive immediate explanations citing source paragraphs.
-7. **Dynamic Mastery Update**: Verify that completing the quiz dynamically updates the competency model and unlocks downstream learning path milestones.
-8. **Statistical AI Tutor**: Ask statistical questions in **AI Tutor (07)** to receive authoritative answers citing official MoSPI manuals.
-9. **Executive Administration**: Switch to **Admin Analytics (08)** to view organization-wide metrics across 8,115 officials, departmental heatmaps, emerging skill forecasts (+42% AI/ML), and open the **Zero Overfitting ML Diagnostics Modal**.
-10. **Virtual Lab Microdata**: Explore **Virtual Lab (10)** to analyze synthetic datasets (*PLFS*, *CPI*, *IIP*, *ASI*) with instant auto-grading.
+1. **Learner Login & Overview (Screen 01)**:
+   - View *Livjot Singh Bedi (JSO, DIID)*.
+   - Review overall readiness (`76%`), 8 priority gaps, and the hero card recommending *Survey Sampling for Official Statistics*.
+2. **Competency Gap Analysis (Screen 02)**:
+   - Inspect the spider-web radar chart comparing Current Mastery vs Official Cadre Target.
+   - Review top priority gaps (*Python for data analysis*, *Survey design*, *Metadata standards*).
+3. **Personalized Learning Pathway (Screen 03)**:
+   - Examine the 4-step sequenced curriculum connecting Foundation (iGOT), Core (iGOT), Practice (Virtual Lab), and Advanced (NSSTA TPAC).
+4. **Explainable Recommendations (Screen 04)**:
+   - Use filter tabs (*iGOT*, *NSSTA / TPAC*) to view match scores and explicit justification badges.
+5. **Trainer Upload & MCQ Generation (Screen 05)**:
+   - Upload a training PDF or load an official publication (*PLFS Methodology*, *CPI Handbook*).
+   - Generate grounded questions with Bloom's taxonomy classifications and page citations.
+   - Export questions to **QTI 2.1**, **Moodle XML**, or **JSON**, then click **Publish Quiz**.
+6. **Adaptive Proctored Quiz (Screen 06)**:
+   - Take the quiz while monitoring the live AI proctoring integrity bar (`AI Proctor: Normal 99% Integrity`).
+   - Submit answers to receive immediate explanations citing source paragraphs.
+7. **Dynamic Competency Update**:
+   - Observe the real-time competency score boost (+8%) and progression in the learning path.
+8. **Statistical AI Tutor (Screen 07)**:
+   - Ask a statistical query (e.g. *"Explain sampling error in simple language"*) and inspect the verified source reference box (*Survey Sampling Manual, pp. 12-13*).
+9. **Administrator Dashboard (Screen 08)**:
+   - Review organization-wide metrics across 8,115 officials, departmental risk heatmaps, and emerging skill demand forecasts (+42% AI/ML).
+   - Click **"Inspect ML Model Diagnostics"** to inspect the empirical zero-overfitting validation modal.
+10. **Virtual Lab Microdata (Screen 10)**:
+    - Explore live synthetic microdata streams (*PLFS*, *CPI*, *IIP*, *ASI*) and test the auto-graded statistical problem set.
 
 ---
 
-## 📡 API Gateway Documentation
+## ⚠️ Integration Disclaimer
 
-The FastAPI backend exposes 32 endpoints categorized below:
-
-### Authentication & Profile
-- `GET /api/health` — Service health and metadata
-- `GET /api/auth/me` — Current learner profile
-- `POST /api/auth/switch-role` — Switch between JSO, SSO, and ISS cadres
-
-### Competency Engine
-- `GET /api/competency/profile` — Profile with domain health and radar chart data
-- `GET /api/competency/gaps` — Prioritized gaps (`Target - Current`)
-- `POST /api/competency/record-progress` — Real-time competency score update
-
-### Courses & Recommendations
-- `GET /api/courses/recommendations` — Multi-criteria hybrid recommendations
-- `GET /api/courses/learning-path` — Sequenced 4-step pathway
-
-### Assessments & Quizzes
-- `GET /api/mcq/active-quiz` — Active assessment question bank
-- `POST /api/mcq/generate` — Generate grounded MCQs from PDF/PPT/Text
-- `POST /api/mcq/export` — Export assessment as JSON, QTI 2.1, or Moodle XML
-- `POST /api/quiz/submit` — Submit quiz with proctoring telemetry score
-
-### AI Proctoring & Tutor
-- `POST /api/proctoring/analyze-frame` — Real-time proctoring telemetry scoring
-- `POST /api/tutor/chat` — Source-grounded statistical Q&A
-
-### Analytics & ML Diagnostics
-- `GET /api/analytics/organization` — 8,115 officials KPIs and department heatmaps
-- `GET /api/analytics/predictions` — Regularized skill demand forecasts
-- `GET /api/analytics/diagnostics` — ML cross-validation and overfitting proof
-
-### MoSPI MCP Datasets & Virtual Lab
-- `GET /api/datasets/{dataset_name}` — Query synthetic datasets (`plfs`, `cpi`, `iip`, `asi`)
-- `POST /api/datasets/verify-exercise` — Auto-graded virtual lab solution validator
-
-*Interactive Swagger documentation is available live at `http://127.0.0.1:8000/docs`.*
+> [!IMPORTANT]
+> **Prototype Data Notice**: In compliance with government data security guidelines and the SIH PRD specifications:
+> - The iGOT Karmayogi course integration in this prototype uses a realistic, curated adapter based on publicly available curricula from the iGOT platform. It is designed so seed records can be directly swapped with authorized live production API endpoints (`IGOT_API_BASE_URL`, `IGOT_CLIENT_ID`, `IGOT_CLIENT_SECRET`) once institutional access is issued by Karmayogi Bharat / MoSPI.
+> - NSSTA training calendar records are structured according to published TPAC curricula from `nssta.gov.in`.
+> - Microdata in the Virtual Lab is synthetic, anonymized, and non-sensitive.
 
 ---
 
@@ -254,79 +210,153 @@ The FastAPI backend exposes 32 endpoints categorized below:
 - **Python 3.11+**
 - **Node.js 18+** and npm
 
-### 1. Clone & Setup Environment
-```bash
+---
+
+### Windows (PowerShell / Command Prompt)
+
+```powershell
+# 1. Clone repository
 git clone https://github.com/your-team/statwise-mospi.git
 cd statwise-mospi
-cp .env.example .env
-```
 
-### 2. Install Dependencies
-```bash
-# Python backend dependencies
+# 2. Setup environment configuration
+Copy-Item .env.example .env
+
+# 3. Install backend dependencies
 pip install -r requirements.txt
 
-# Frontend dependencies
-cd frontend
+# 4. Install frontend dependencies
+Set-Location frontend
 npm install
-cd ..
-```
+Set-Location ..
 
-### 3. Launch Application
-
-#### Option A: Windows One-Click
-Double click `run_app.bat` or run:
-```cmd
-run_app.bat
-```
-
-#### Option B: PowerShell One-Click
-```powershell
+# 5. One-Click Launch (starts both servers)
 .\run_app.ps1
 ```
 
-#### Option C: Manual Launch
-Terminal 1 (Backend):
+*Or double-click `run_app.bat` in Windows File Explorer.*
+
+---
+
+### macOS & Linux (Bash / Zsh)
+
 ```bash
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
-```
-Terminal 2 (Frontend):
-```bash
+# 1. Clone repository
+git clone https://github.com/your-team/statwise-mospi.git
+cd statwise-mospi
+
+# 2. Setup environment configuration
+cp .env.example .env
+
+# 3. Install backend dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 4. Install frontend dependencies
+cd frontend
+npm install
+cd ..
+
+# 5. Launch Backend (Terminal 1)
+python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+
+# 6. Launch Frontend (Terminal 2)
 cd frontend
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-- **Frontend UI**: [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
-- **Backend API & Swagger**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+---
+
+## 🐳 Docker Quick Start
+
+Run the entire platform (PostgreSQL, Redis, FastAPI Backend, and Frontend) in isolated Docker containers:
+
+```bash
+# Copy environment file
+cp .env.example .env
+
+# Build and start all services
+docker compose up --build -d
+
+# Open in browser:
+# Frontend Web App:     http://localhost:5173 (or http://localhost:3000)
+# FastAPI Swagger Docs: http://localhost:8000/docs
+```
+
+To stop containers and clean volume state:
+```bash
+docker compose down -v
+```
 
 ---
 
-## 🐳 Docker & Production Deployment
+## ⚙️ Environment Variables Reference
 
-### Docker Compose
-Run both backend and frontend in isolated containers:
-```bash
-docker-compose up --build -d
-```
+| Variable | Default Value | Description |
+|---|---|---|
+| `PORT` | `8000` | Backend server port |
+| `HOST` | `127.0.0.1` | Backend binding address |
+| `POSTGRES_DB` | `statwise` | PostgreSQL database name |
+| `POSTGRES_USER` | `statwise_user` | Database username |
+| `POSTGRES_PASSWORD` | `change_this_for_local_development` | Database password |
+| `SECRET_KEY` | `replace_with_a_long_random_value` | JWT session encryption key |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Session token lifetime |
+| `CORS_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Allowed frontend origins |
+| `IGOT_API_BASE_URL` | *(blank in prototype)* | Production iGOT Karmayogi API URL |
+| `IGOT_CLIENT_ID` | *(blank in prototype)* | Institutional iGOT Client ID |
+| `LLM_PROVIDER` | `local` | LLM engine (`local` / `ollama`) |
+| `MAX_UPLOAD_MB` | `20` | Maximum uploaded document size |
+| `VITE_API_URL` | `http://localhost:8000` | Backend API URL for frontend |
 
-### Production Deployment (Railway / MeghRaj)
-```bash
-# Deploy Backend
-cd backend
-railway init
-railway up
+---
 
-# Deploy Frontend
-cd ../frontend
-railway init
-railway up
-```
+## 📡 API Gateway Documentation
+
+The FastAPI backend exposes 32 REST endpoints:
+
+### System & Health
+- `GET /health` & `GET /api/health` — Service health & MoSPI metadata
+- `GET /docs` — Interactive Swagger UI
+- `GET /openapi.json` — OpenAPI 3.1.0 specification
+
+### Authentication & Profile
+- `GET /api/auth/me` — Current learner profile
+- `POST /api/auth/switch-role` — Switch between JSO, SSO, and ISS cadres
+
+### Competency Framework
+- `GET /api/competency/profile` — 4-domain health and spider radar overlay
+- `GET /api/competency/gaps` — Ranked competency gaps
+- `POST /api/competency/record-progress` — Dynamic mastery gain updates
+
+### Course Catalog & Pathways
+- `GET /api/courses/recommendations` — Multi-attribute ranked courses
+- `GET /api/courses/learning-path` — Sequenced 4-step prerequisite pathway
+
+### Assessments & Quizzes
+- `GET /api/mcq/active-quiz` — Active question bank with Bloom's levels
+- `POST /api/mcq/generate` — Grounded MCQ generation from documents
+- `POST /api/mcq/export` — Multi-format export (JSON, QTI 2.1, Moodle XML)
+- `POST /api/quiz/submit` — Submit quiz with proctoring integrity score
+
+### AI Proctoring & Tutor
+- `POST /api/proctoring/analyze-frame` — Real-time telemetry anomaly scoring
+- `POST /api/tutor/chat` — Source-grounded statistical Q&A
+
+### Analytics & ML Diagnostics
+- `GET /api/analytics/organization` — Aggregated KPIs & division heatmaps
+- `GET /api/analytics/predictions` — Regularized skill demand forecasts
+- `GET /api/analytics/diagnostics` — ML cross-validation & zero overfitting proof
+
+### MoSPI MCP Datasets & Virtual Lab
+- `GET /api/datasets/{dataset_name}` — Microdata for `plfs`, `cpi`, `iip`, `asi`
+- `POST /api/datasets/verify-exercise` — Auto-graded problem set validator
 
 ---
 
 ## 🧪 Testing & Quality Assurance
 
-Run the complete verification suite:
+Run the comprehensive automated test suite:
 
 ```bash
 # 1. Live Network HTTP audit of all 32 FastAPI endpoints
@@ -353,6 +383,18 @@ cd frontend && npm run build
 
 ---
 
+## 🔧 Troubleshooting
+
+| Issue | Cause | Solution |
+|---|---|---|
+| `Port 8000 in use` | Another process is using port 8000 | Kill process or run uvicorn on `--port 8001` and update `.env` |
+| `Port 5173 in use` | Another Vite instance is running | Vite will automatically switch to 5174; update `CORS_ORIGINS` in `.env` |
+| `ModuleNotFoundError` | Missing Python dependency | Run `pip install -r requirements.txt` |
+| `UnicodeEncodeError` in Windows console | Windows CP1252 character set | Set environment variable `$env:PYTHONIOENCODING="utf-8"` |
+| `Docker Desktop not running` | Docker daemon inactive | Start Docker Desktop before running `docker compose up` |
+
+---
+
 ## 📂 Repository Structure
 
 ```
@@ -364,6 +406,7 @@ STATGYAN/
 │   ├── test_ml_models.py          # ML validation suite (overfitting check)
 │   ├── test_endpoints.py          # API integration tests
 │   ├── Dockerfile                 # Backend container definition
+│   ├── .dockerignore              # Backend docker ignore rules
 │   ├── ml/
 │   │   ├── skill_forecasting_model.py # Regularized Ridge model for skill demand
 │   │   ├── blooms_classifier.py       # Bloom's taxonomy cognitive verb classifier
@@ -397,7 +440,8 @@ STATGYAN/
 │   │       └── VirtualLabView.jsx     # Screen 10: MoSPI Virtual Lab
 │   ├── package.json                   # Frontend dependencies
 │   ├── tailwind.config.js             # Screenbook color palette configuration
-│   └── Dockerfile                     # Frontend container definition
+│   ├── Dockerfile                     # Frontend container definition
+│   └── .dockerignore                  # Frontend docker ignore rules
 ├── .env.example                       # Environment configuration template
 ├── docker-compose.yml                 # Multi-container orchestration
 ├── requirements.txt                   # Root Python dependencies
@@ -410,15 +454,16 @@ STATGYAN/
 
 ## 👥 Team & Acknowledgments
 
-### Team Members
-- **Livjot Singh Bedi** — Full Stack & System Architect
-- **AI/ML Engineer** — Competency Modeling & Forecasting
-- **AI/ML Engineer** — Grounded Assessment & NLP Engine
-- **Frontend Engineer** — Learner & Admin Experience
-- **DevOps Engineer** — iGOT Karmayogi & Cloud Integration
+### Team Roles & Responsibilities
+- **Full Stack Developer & System Architect** — FastAPI Gateway, Vite React Frontend, and state management.
+- **AI/ML Engineer (Competency & Forecasting)** — Regularized skill demand regression, non-overfitting validation, and DAG solver.
+- **AI/ML Engineer (MCQ & NLP)** — Bloom's taxonomy cognitive verb classifier, document extraction, and grounding validator.
+- **Frontend Developer (Learner Experience)** — Screenbook UI implementation, interactive radar charts, and quiz player.
+- **Frontend Developer (Admin & Analytics)** — Executive heatmap, ML diagnostics modal, and report exporters.
+- **DevOps Engineer (Cloud & Integrations)** — Docker Compose, iGOT adapter architecture, and CI/CD pipelines.
 
-### Acknowledgments
-- **Ministry of Statistics and Programme Implementation (MoSPI)**: Data Informatics & Innovation Division (DIID)
-- **National Statistical Systems Training Academy (NSSTA)**: Greater Noida campus & TPAC curriculum designers
-- **iGOT Karmayogi Platform**: Mission Karmayogi capacity-building framework
-- **Smart India Hackathon 2026**: Organizers and mentors
+### Institutional Acknowledgments
+- **Ministry of Statistics and Programme Implementation (MoSPI)**: Data Informatics & Innovation Division (DIID) for Problem Statement 26101.
+- **National Statistical Systems Training Academy (NSSTA)**: Greater Noida campus for TPAC capacity-building guidelines.
+- **iGOT Karmayogi Bharat**: Mission Karmayogi civil services competency framework.
+- **Smart India Hackathon 2026**: Ministry of Education's Innovation Cell (MIC) & AICTE.

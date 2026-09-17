@@ -1,6 +1,35 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-statwise}
+      POSTGRES_USER: ${POSTGRES_USER:-statwise_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    ports:
+      - "6379:6379"
+
   backend:
     build:
       context: .
@@ -9,12 +38,26 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - PORT=8000
-      - HOST=0.0.0.0
-      - DATABASE_URL=sqlite:///./statwise.db
-      - SECRET_KEY=mospi_super_secret_jwt_key_2026_sih
-      - IGOT_API_KEY=igot_mock_api_key_prod_2026
-    restart: unless-stopped
+      PORT: 8000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-statwise_user}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-statwise}
+      REDIS_URL: redis://redis:6379/0
+      UPLOAD_DIR: /app/uploads
+      SECRET_KEY: ${SECRET_KEY:-replace_with_a_long_random_value}
+      IGOT_API_BASE_URL: ${IGOT_API_BASE_URL:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-local}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
 
   frontend:
     build:
@@ -24,7 +67,12 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      VITE_API_URL: http://localhost:8000
     depends_on:
-      - backend
-    restart: unless-stopped
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
