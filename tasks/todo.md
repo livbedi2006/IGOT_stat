@@ -8,13 +8,13 @@
 - [x] Task 1.5: Write unit and cross-validation tests (`backend/test_ml_models.py`) verifying generalization and absence of overfitting.
 
 ## Phase 2: Backend API & MoSPI Domain Services
-- [ ] Task 2.1: Implement Competency Framework Service (`backend/services/competency_service.py`) for 4 domains and 100+ competencies.
-- [ ] Task 2.2: Implement Grounded MCQ Generator Service (`backend/services/mcq_service.py`) with document parser, source citing, and QTI/JSON/Moodle export.
-- [ ] Task 2.3: Implement iGOT Karmayogi & NSSTA TPAC course catalogue service (`backend/services/igot_nssta_service.py`).
-- [ ] Task 2.4: Implement MoSPI Statistical Knowledge Tutor (`backend/services/tutor_service.py`).
-- [ ] Task 2.5: Implement MoSPI MCP Datasets Service (`backend/services/dataset_service.py`) for PLFS, CPI, IIP, ASI, NAS.
-- [ ] Task 2.6: Implement FastAPI API Gateway (`backend/main.py`) wiring all routes.
-- [ ] Task 2.7: Test all backend API endpoints (`backend/test_endpoints.py`).
+- [x] Task 2.1: Implement Competency Framework Service (`backend/services/competency_service.py`) for 4 domains and 100+ competencies.
+- [x] Task 2.2: Implement Grounded MCQ Generator Service (`backend/services/mcq_service.py`) with document parser, source citing, and QTI/JSON/Moodle export.
+- [x] Task 2.3: Implement iGOT Karmayogi & NSSTA TPAC course catalogue service (`backend/services/igot_nssta_service.py`).
+- [x] Task 2.4: Implement MoSPI Statistical Knowledge Tutor (`backend/services/tutor_service.py`).
+- [x] Task 2.5: Implement MoSPI MCP Datasets Service (`backend/services/dataset_service.py`) for PLFS, CPI, IIP, ASI, NAS.
+- [x] Task 2.6: Implement FastAPI API Gateway (`backend/main.py`) wiring all routes.
+- [x] Task 2.7: Test all backend API endpoints (`backend/test_endpoints.py`).
 
 ## Phase 3: Frontend Web Application (STATWISE Screenbook Design System)
 - [ ] Task 3.1: Initialize Vite React app with Tailwind CSS and install dependencies (`lucide-react`, `recharts`, `canvas-confetti`).
