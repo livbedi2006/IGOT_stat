@@ -20,17 +20,18 @@
 5. [System Architecture](#-system-architecture)
 6. [Machine Learning Core: Zero Overfitting Guarantee](#-machine-learning-core-zero-overfitting-guarantee)
 7. [STATWISE Screenbook UI Design System](#-statwise-screenbook-ui-design-system)
-8. [Best Final-Demo Flow](#-best-final-demo-flow)
-9. [Integration Disclaimer](#-integration-disclaimer)
-10. [Quick Start Guide (Windows, macOS, Linux)](#-quick-start-guide)
-11. [Docker Quick Start](#-docker-quick-start)
-12. [Environment Variables Reference](#-environment-variables-reference)
-13. [API Gateway Documentation](#-api-gateway-documentation)
-14. [Testing & Quality Assurance](#-testing--quality-assurance)
-15. [Security & Statutory Compliance](#-security--statutory-compliance)
-16. [Troubleshooting](#-troubleshooting)
-17. [Repository Structure](#-repository-structure)
-18. [Team & Acknowledgments](#-team--acknowledgments)
+8. [Application Interface & Visual Tour (Screenshots)](#-application-interface--visual-tour)
+9. [Best Final-Demo Flow](#-best-final-demo-flow)
+10. [Integration Disclaimer](#-integration-disclaimer)
+11. [Quick Start Guide (Windows, macOS, Linux)](#-quick-start-guide)
+12. [Docker Quick Start](#-docker-quick-start)
+13. [Environment Variables Reference](#-environment-variables-reference)
+14. [API Gateway Documentation](#-api-gateway-documentation)
+15. [Testing & Quality Assurance](#-testing--quality-assurance)
+16. [Security & Statutory Compliance](#-security--statutory-compliance)
+17. [Troubleshooting](#-troubleshooting)
+18. [Repository Structure](#-repository-structure)
+19. [Team & Acknowledgments](#-team--acknowledgments)
 
 ---
 
@@ -158,6 +159,85 @@ The user interface strictly adheres to the official **STATWISE Application Desig
 - **Pale Blue (`#B3CFE5`)**: Cards, surfaces, progress track backgrounds.
 - **Crisp Canvas (`#F6FAFD`)**: Clean, high-readability page background.
 - **Typography**: Clean Google Inter font paired with Noto Sans Devanagari for official Indian government bilingual context.
+
+---
+
+## 📸 Application Interface & Visual Tour
+
+### 1. Overview (Learner Home Dashboard)
+The learner home screen prioritizes one next best learning action rather than presenting an overwhelming, uncurated catalogue. It showcases the 4 primary readiness KPIs, priority gap counters, and real-time skill health across the 4 cadre domains.
+
+![01 Overview Dashboard](docs/screenshots/01_overview_dashboard.png)
+
+---
+
+### 2. Competency Profile & Radar Chart
+Visualizes competency mastery by comparing the official's assessed skill levels against the statutory target proficiency for their role (*JSO / SSO / ISS*) using an interactive spider-web radar chart and dual progress indicators.
+
+![02 Competency Radar](docs/screenshots/02_competency_radar.png)
+
+---
+
+### 3. Personalized Learning Pathway
+Sequences digital iGOT courses, hands-on virtual labs, and NSSTA/TPAC executive workshops in strict prerequisite order (*Foundation → Core → Practice → Advanced*) with role alignment scoring and pacing indicators.
+
+![03 Learning Pathway](docs/screenshots/03_personalized_learning_pathway.png)
+
+---
+
+### 4. Explainable Course Recommendations
+Every course recommendation includes an explicit pedagogical justification explaining why it was selected, which specific competency gap it closes, and which official training body delivers it.
+
+![04 Recommendations](docs/screenshots/04_explainable_recommendations.png)
+
+---
+
+### 5. Grounded Assessment & MCQ Generation Engine
+Enables faculty and trainers to upload training manuals (*PDF, PPT, Word*) or load official MoSPI publications to generate grounded assessments validated by Bloom's cognitive taxonomy with instant export to **IMS QTI 2.1 (LMS)**, **Moodle XML**, or **JSON**.
+
+![05 Assessments Engine](docs/screenshots/05_grounded_assessment_mcq_engine.png)
+
+---
+
+### 6. Adaptive Quiz Player with AI Proctoring
+Provides an adaptive testing environment monitored by a multi-factor AI proctoring bar (*Face count, Gaze vector tracking, Tab switch listener*). Learners receive instant explanations citing exact pages and paragraphs of official MoSPI guidelines.
+
+![06 Quiz Player](docs/screenshots/06_quiz_player_ai_proctoring.png)
+
+---
+
+### 7. Statistical AI Tutor (Source-Grounded RAG)
+A conversational statistical assistant grounded strictly in approved MoSPI resources (*NSSO Sampling Design Manual*, *PLFS Reports*, *National Accounts Guidelines*), returning verified source citations with every answer.
+
+![07 AI Tutor](docs/screenshots/07_statistical_ai_tutor.png)
+
+---
+
+### 8. Administrator Analytics Dashboard
+Gives leadership organization-wide visibility across 8,115 active officials, competency distributions across cadres, emerging skill demand projections (+42% AI/ML), and departmental risk heatmaps.
+
+![08 Admin Analytics](docs/screenshots/08_admin_analytics_heatmaps.png)
+
+---
+
+### 9. Machine Learning Model Diagnostics (Zero Overfitting Audit)
+An empirical inspection modal proving that all predictive ML models generalize to unseen statistical cadres without memorization or high variance, displaying 5-fold cross-validation learning curves and L2 regularization shrinkage metrics.
+
+![09 ML Diagnostics](docs/screenshots/09_ml_model_overfitting_diagnostics.png)
+
+---
+
+### 10. MoSPI Virtual Lab & MCP Synthetic Datasets
+Enables officials to explore live synthetic microdata streams (*PLFS*, *CPI*, *IIP*, *ASI*) and complete interactive, auto-graded statistical problem sets directly in the browser.
+
+![10 Virtual Lab](docs/screenshots/10_mospi_mcp_virtual_lab.png)
+
+---
+
+### 11. Profile, Cadre Switcher & Statutory Privacy Settings
+Gives officials full visibility and control over cadre designation, department, language preferences (*English / Hindi*), and privacy compliance controls under the **DPDP Act 2023**.
+
+![11 Profile Settings](docs/screenshots/11_profile_dpdp_privacy_settings.png)
 
 ---
 
