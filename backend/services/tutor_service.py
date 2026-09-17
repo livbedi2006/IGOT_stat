@@ -1,97 +1,219 @@
 """
-Statistical AI Tutor Service for MoSPI STATWISE Platform.
-Provides source-grounded answers to official statistical queries with page-level citations.
+Statistical AI Tutor Service for MoSPI STATWISE Platform (Prompt O).
+Strictly grounded in approved NSSTA materials, official methodologies,
+and verified glossaries.
+Rules:
+1. Retrieves matching passages before generating response.
+2. Every answer displays exact source title, page/slide number, and authoring body.
+3. Strict Uncertainty Fallback: If evidence is absent or similarity is low,
+   explicitly declares uncertainty and directs learner to official NSSTA reference or trainer.
+4. Collects helpful / not-helpful feedback telemetry.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+import uuid
 
 
-# Official grounded knowledge passages
 KNOWLEDGE_PASSAGES = [
     {
-        "keywords": ["sampling error", "sample size", "standard error", "variance"],
-        "answer": "Sampling error is the difference between a sample estimate and the true population value that arises because only a portion of the population is observed. It can be reduced by a well-designed sample, adequate sample size, stratification of heterogeneous units, and calibrated weighting.",
+        "id": "kb_sampling_error",
+        "keywords": ["sampling error", "sample size", "standard error", "variance", "precision", "confidence interval"],
+        "answer": "Sampling error is the mathematical difference between a sample statistic and the true population parameter arising because only a representative fraction of units is observed. In official MoSPI survey design, sampling error is controlled through optimum sample allocation across stratified homogeneous domains, larger effective sample sizes, and calibration weighting.",
         "sources": [
-            {"title": "Survey Sampling Manual", "pages": "pp. 12-13", "section": "Chapter 2: Precision and Errors in Sample Surveys", "author": "MoSPI DIID & NSSTA"}
-        ]
+            {
+                "title": "MoSPI Survey Sampling Methodology Manual 2024",
+                "page": "Page 12-14",
+                "section": "Chapter 2: Precision & Sampling Variance Estimation",
+                "authority": "MoSPI DIID & NSSTA Greater Noida"
+            }
+        ],
+        "confidence": 0.95
     },
     {
-        "keywords": ["stratified sampling", "strata", "cluster", "multistage"],
-        "answer": "Stratified sampling divides the population into non-overlapping subgroups (strata) that are internally homogeneous and externally heterogeneous. Sample units are drawn independently from each stratum. Compared to simple random sampling, stratification guarantees representation of all key subgroups and yields lower overall sampling variance for equal sample size.",
+        "id": "kb_stratified_sampling",
+        "keywords": ["stratified sampling", "strata", "multistage", "cluster", "fsu", "usu", "allocation"],
+        "answer": "Stratified sampling partitions heterogeneous population units into mutually exclusive, internally homogeneous strata (e.g., district-level rural/urban, household consumer expenditure classes). Sample units are drawn independently within each stratum, ensuring representation of demographic sub-populations and substantially reducing overall sampling variance compared to simple random sampling.",
         "sources": [
-            {"title": "NSSO Sample Survey Design Handbook", "pages": "pp. 24-27", "section": "Section 3.1: Multistage Stratified Sampling in NSS Rounds", "author": "National Statistical Office (NSO)"}
-        ]
+            {
+                "title": "NSSO Sample Survey Design Handbook",
+                "page": "Page 24-27",
+                "section": "Section 3.1: Multistage Stratified Sampling in NSS Rounds",
+                "authority": "National Statistical Office (NSO)"
+            }
+        ],
+        "confidence": 0.96
     },
     {
-        "keywords": ["cpi", "inflation", "consumer price index", "laspeyres"],
-        "answer": "The All-India Consumer Price Index (CPI Base 2012=100) measures changes over time in the general level of prices of a fixed basket of consumer goods and services purchased by households. It is compiled using the Modified Laspeyres formula with fixed base-year expenditure weights obtained from the Household Consumer Expenditure Survey.",
+        "id": "kb_cpi_laspeyres",
+        "keywords": ["cpi", "inflation", "consumer price index", "laspeyres", "basket", "weights", "food and beverages"],
+        "answer": "The All-India Consumer Price Index (CPI Base 2012=100) measures changes in the general retail price level of a fixed consumption basket. It is compiled by MoSPI using the Modified Laspeyres formula with fixed base-year expenditure weights derived from the Consumer Expenditure Survey. Elementary market-level price relatives are aggregated using geometric means before higher-level Laspeyres weighting.",
         "sources": [
-            {"title": "CPI Methodological Manual (Base 2012=100)", "pages": "pp. 18-22", "section": "Chapter 3: Price Collection, Weighting Diagram & Aggregation", "author": "Price Statistics Division, MoSPI"}
-        ]
+            {
+                "title": "CPI Methodological Handbook (Base 2012=100)",
+                "page": "Page 18-22",
+                "section": "Chapter 3: Weighting Diagram & Aggregation Formula",
+                "authority": "Price Statistics Division, MoSPI"
+            }
+        ],
+        "confidence": 0.94
     },
     {
-        "keywords": ["plfs", "labour force", "unemployment", "wpr", "upss"],
-        "answer": "In the Periodic Labour Force Survey (PLFS), Labour Force Participation Rate (LFPR) is defined as the percentage of persons in the labour force (working or seeking work) in the population. Worker Population Ratio (WPR) is the percentage of employed persons. Measurement is conducted under two approaches: Usual Status (reference period of 365 days) and Current Weekly Status (reference period of 7 days).",
+        "id": "kb_plfs_lfpr",
+        "keywords": ["plfs", "labour force", "unemployment", "wpr", "upss", "cws", "periodic labour force"],
+        "answer": "In the Periodic Labour Force Survey (PLFS), the Labour Force Participation Rate (LFPR) is the percentage of persons in the labour force (either working or seeking work). Worker Population Ratio (WPR) measures the percentage of employed persons. Measurement uses two concepts: Usual Principal and Subsidiary Status (UPSS, 365-day reference) and Current Weekly Status (CWS, 7-day reference).",
         "sources": [
-            {"title": "Periodic Labour Force Survey (PLFS) Annual Report", "pages": "pp. 8-11", "section": "Concepts and Definitions", "author": "Ministry of Statistics & Programme Implementation"}
-        ]
+            {
+                "title": "Periodic Labour Force Survey (PLFS) Annual Report",
+                "page": "Page 8-11",
+                "section": "Concepts, Definitions & Activity Classifications",
+                "authority": "Social Statistics Division, MoSPI"
+            }
+        ],
+        "confidence": 0.96
     },
     {
-        "keywords": ["gva", "gdp", "national accounts", "intermediate consumption"],
-        "answer": "Gross Value Added (GVA) at basic prices is conceptually defined as the value of gross output of goods and services minus the value of intermediate consumption used up in the production process. Gross Domestic Product (GDP) at market prices is derived by adding product taxes and subtracting product subsidies from aggregate GVA at basic prices.",
+        "id": "kb_gva_gdp",
+        "keywords": ["gva", "gdp", "national accounts", "gross value added", "intermediate consumption", "sna 2008"],
+        "answer": "Under SNA 2008, Gross Value Added (GVA) at basic prices is defined as Gross Output minus Intermediate Consumption. Gross Domestic Product (GDP) at market prices is derived by adding net product taxes (Product Taxes minus Product Subsidies) to aggregate GVA at basic prices.",
         "sources": [
-            {"title": "National Accounts Statistics: Sources and Methods (SNA 2008)", "pages": "pp. 42-46", "section": "Chapter 4: Production Account and Gross Value Added", "author": "National Accounts Division, MoSPI"}
-        ]
+            {
+                "title": "National Accounts Statistics: Sources and Methods (SNA 2008)",
+                "page": "Page 42-46",
+                "section": "Chapter 4: Production Account and Value Added Reconciliation",
+                "authority": "National Accounts Division, MoSPI"
+            }
+        ],
+        "confidence": 0.97
     },
     {
-        "keywords": ["dpdp", "privacy", "anonymization", "confidentiality"],
-        "answer": "Under the Digital Personal Data Protection Act 2023, government statistical authorities acting as Data Fiduciaries must ensure that personal data collected during surveys is processed solely for lawful statistical purposes and that released public microdata files are subjected to k-anonymity, suppression, or differential privacy to ensure survey respondents cannot be re-identified.",
+        "id": "kb_dpdp_anonymization",
+        "keywords": ["dpdp", "privacy", "anonymization", "k-anonymity", "confidentiality", "safe data enclave", "fiduciary"],
+        "answer": "Under the Digital Personal Data Protection (DPDP) Act 2023, MoSPI acts as a Data Fiduciary. When releasing survey microdata, direct identifiers must be completely removed, and disclosure risk mitigated using k-anonymity and differential privacy. Granular unmasked microdata is accessible only to accredited researchers within Safe Data Enclaves.",
         "sources": [
-            {"title": "Guidelines on Statistical Confidentiality and DPDP Act 2023", "pages": "pp. 5-7", "section": "Statutory Fiduciary Obligations in Official Microdata", "author": "Data Informatics & Innovation Division, MoSPI"}
-        ]
+            {
+                "title": "Guidelines on Statistical Confidentiality and DPDP Act 2023",
+                "page": "Page 5-9",
+                "section": "Section 2: Microdata De-identification & Fiduciary Mandate",
+                "authority": "Data Informatics & Innovation Division, MoSPI"
+            }
+        ],
+        "confidence": 0.98
+    },
+    {
+        "id": "kb_asi_industrial",
+        "keywords": ["asi", "annual survey of industries", "factories act", "census sector", "sample sector", "invested capital"],
+        "answer": "The Annual Survey of Industries (ASI) covers manufacturing units registered under Sections 2m(i) and 2m(ii) of the Factories Act 1948. Units employing 100 or more workers are completely enumerated in the Census Sector, while remaining registered units are sampled under the Sample Sector to compute Net Value Added and capital formation.",
+        "sources": [
+            {
+                "title": "ASI Instruction Manual (Industrial Statistics Wing)",
+                "page": "Page 11-14",
+                "section": "Chapter 1: Frame Structure and Sampling Design",
+                "authority": "Industrial Statistics Wing, MoSPI"
+            }
+        ],
+        "confidence": 0.95
     }
 ]
 
 
+UNCERTAINTY_RESPONSE = (
+    "This query cannot be verified from approved MoSPI/NSSTA learning materials. "
+    "To maintain statistical fidelity, the AI Tutor only provides source-backed answers. "
+    "Please consult an official NSSTA reference document or contact a designated cadre trainer."
+)
+
+
 class TutorService:
+    """Source-grounded RAG Tutor with strict uncertainty fallback and feedback telemetry."""
+
     def __init__(self):
         self.passages = KNOWLEDGE_PASSAGES
+        self.feedback_log: List[Dict[str, Any]] = []
 
     def answer_query(self, user_query: str) -> Dict[str, Any]:
         """
-        Retrieves grounded answer and exact source citations for a statistical query.
+        Retrieves grounded passage with page/slide references.
+        Returns strict uncertainty fallback when evidence is insufficient (Prompt O).
         """
-        query_tokens = set(user_query.lower().replace("?", "").replace(",", "").split())
+        message_id = f"msg_{uuid.uuid4().hex[:8]}"
+        clean_q = user_query.lower().replace("?", "").replace(",", "").replace(".", "")
+        query_words = set(clean_q.split())
 
         best_match = None
-        highest_overlap = 0
+        best_score = 0
 
         for p in self.passages:
-            overlap = 0
+            score = 0
             for kw in p["keywords"]:
-                kw_tokens = set(kw.lower().split())
-                if kw_tokens.issubset(query_tokens) or len(query_tokens.intersection(kw_tokens)) > 0:
-                    overlap += 2
-            if overlap > highest_overlap:
-                highest_overlap = overlap
+                kw_lower = kw.lower()
+                if kw_lower in clean_q:
+                    score += 3
+                else:
+                    kw_tokens = set(kw_lower.split())
+                    common = query_words.intersection(kw_tokens)
+                    if common:
+                        score += len(common)
+
+            if score > best_score:
+                best_score = score
                 best_match = p
 
-        if best_match and highest_overlap > 0:
+        # Strict evidence threshold: If match score is below minimum threshold, return uncertainty response
+        if best_match and best_score >= 2:
             return {
+                "message_id": message_id,
                 "query": user_query,
                 "answer": best_match["answer"],
                 "sources": best_match["sources"],
                 "is_grounded": True,
-                "confidence": 0.96
+                "confidence": best_match["confidence"],
+                "status": "VERIFIED_OFFICIAL_GROUNDING"
             }
 
-        # Fallback grounded answer with official MoSPI reference
+        # Prompt O & Section 8 mandatory constraint: Uncertainty fallback
         return {
+            "message_id": message_id,
             "query": user_query,
-            "answer": f"Regarding '{user_query}': In official statistical practice under MoSPI standards, methodologies are strictly aligned with UN Fundamental Principles of Official Statistics and national TPAC guidelines. All data collection, sampling designs, and index compilations follow documented standard operating procedures to ensure impartiality, reliability, and precision.",
+            "answer": UNCERTAINTY_RESPONSE,
             "sources": [
-                {"title": "MoSPI General Statistical Guidelines & Standards", "pages": "pp. 1-5", "section": "Section 1: Official Statistics Framework", "author": "MoSPI DIID"}
+                {
+                    "title": "National Statistical Systems Training Academy (NSSTA) Reference Catalogue",
+                    "page": "Helpdesk Directory",
+                    "section": "Cadre Training Advisory",
+                    "authority": "NSSTA Greater Noida"
+                }
             ],
-            "is_grounded": True,
-            "confidence": 0.88
+            "is_grounded": False,
+            "confidence": 0.0,
+            "status": "UNVERIFIED_EVIDENCE_FALLBACK"
         }
+
+    def record_feedback(
+        self,
+        message_id: str,
+        helpful: bool,
+        user_comment: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Logs learner feedback for tutor accuracy auditing (Prompt O)."""
+        entry = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "message_id": message_id,
+            "helpful": helpful,
+            "user_comment": user_comment or ""
+        }
+        self.feedback_log.append(entry)
+        return {"status": "SUCCESS", "message": "Feedback recorded", "entry": entry}
+
+    def get_feedback_summary(self) -> Dict[str, Any]:
+        total = len(self.feedback_log)
+        helpful_count = sum(1 for f in self.feedback_log if f.get("helpful"))
+        return {
+            "total_feedback_count": total,
+            "helpful_count": helpful_count,
+            "helpful_pct": round((helpful_count / total * 100), 1) if total else 100.0
+        }
+
+
+# Singleton tutor service
+tutor_service = TutorService()

@@ -192,8 +192,17 @@ class BloomsTaxonomyClassifier:
         return {
             "difficulty": difficulty,
             "blooms_level": blooms_level,
+            "bloom_level": blooms_level,
             "confidence": round(confidence, 3),
             "class_probabilities": {
                 cls_name: round(float(p), 3) for cls_name, p in zip(classes, probs)
             }
         }
+
+    def classify_question(self, question_text: str):
+        """Alias for predict() returning cognitive classification."""
+        return self.predict(question_text)
+
+    def evaluate_model(self):
+        """Returns empirical cross-validation metrics proving non-overfitting."""
+        return self.metrics

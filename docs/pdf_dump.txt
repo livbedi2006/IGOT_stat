@@ -1,0 +1,380 @@
+=== PAGE 1 ===
+STATWISE  Pending Work & Prompt Pack
+Page 1
+ STATWISE
+ Pending Work, Prompt Pack & Docker
+ Deployment Guide
+A practical build plan for the AI-enabled competency and learning platform  SIH MoSPI Problem Statement
+ 26101
+How to use this document
+Complete the tasks in the stated order. Copy each prompt into your preferred coding assistant only after the
+prerequisite feature is working. Replace mock catalogue data with authorized iGOT/NSSTA data only when access
+and approval are available. The Docker files included here make the prototype easier to run consistently across
+laptops, but Docker still requires Docker Desktop or Docker Engine on the host device.
+1. Pending-work priority order
+ Order
+Task
+Completion definition
+1
+Repository and environment baseline
+A clean repository, .env.example, consistent project structure and seed data exist.
+2
+Authentication and RBAC
+Learner, trainer and admin routes are protected and role-specific.
+3
+Role profile and competency framework
+Profile fields, target competency matrix and role mapping are stored.
+4
+Baseline assessment and gap engine
+Assessment outputs evidence-backed, ranked skill gaps.
+5
+Learner dashboard
+Profile, gaps, learning progress and next action load from real APIs.
+6
+Catalogue adapters
+Mock/curated iGOT and NSSTA/TPAC data can be searched and filtered.
+7
+Explainable recommender
+Top courses/programmes are ranked with reasons and prerequisite checks.
+8
+Secure upload
+Authorized trainer can upload and process supported documents.
+9
+Grounded MCQ workflow
+Generation, quality checks, trainer review, quiz publishing and feedback work
+end-to-end.
+10
+Admin analytics
+Role-protected aggregate metrics, filters and exports work.
+11
+Tutor and advanced features
+Source-grounded tutor/virtual lab added only after core workflow is stable.
+12
+Hardening and delivery
+Tests, Docker, deployment, README, demo seed data, PPT and backup video
+complete.
+
+
+=== PAGE 2 ===
+STATWISE  Pending Work & Prompt Pack
+Page 2
+2. Audit and core platform prompts
+Prompt A — Codebase audit
+ Act as a senior full-stack code reviewer for my SIH project named STATWISE.
+Review project structure, frontend routes, backend endpoints, database schema, environment variables, tests and README. Intended
+features: role profile, competency gap analysis, iGOT + NSSTA/TPAC recommendations, PDF/PPT/DOCX MCQ generation,
+learner/admin dashboards and secure RBAC.
+Return: implemented features; incomplete features; disconnected frontend/backend flows; missing models; security issues; dead code;
+and top 10 tasks ranked Blocker/High/Medium/Low. Stay within this scope.
+Prompt B — Role profile and onboarding
+ Build/improve the STATWISE learner onboarding flow. Fields: full name, official email, designation, department, current assignment,
+experience years, qualification, preferred language, previous training and career goal.
+Requirements: client- and server-side validation; PostgreSQL persistence; selectable designation/department from demo data;
+responsive UI using #0A1931 #B3CFE5 #4A7FA7 #1A3D63 #F6FAFD; loading/success/error states. Return schema, API route,
+validation, database migration/model and frontend component.
+Prompt C — Official Statistics competency framework
+ Create seedable STATWISE competency data for Statistical, Technical, Digital Governance and Behavioural/Managerial domains.
+Include the competencies stated in SIH Problem Statement 26101. Create role target matrices for Junior Statistical Officer, Senior
+Statistical Officer, Data Analyst, ISS Officer and Training Administrator.
+For each competency include ID, name, domain, description, target score 0–100, role criticality 1–5, prerequisites and evidence types:
+self-assessment, quiz, course completion, manager validation, virtual lab. Provide JSON seed data and PostgreSQL/ORM models.
+Prompt D — Diagnostic and gap engine
+ Implement a role-based baseline diagnostic assessment and transparent gap engine for STATWISE. Tag each question with
+competency IDs and difficulty. Persist attempt, answers, scores and evidence.
+Compute gap = max(0, target_score - current_score). Rank gaps with: 45% normalized gap, 30% role criticality, 15% assignment
+relevance, 10% prerequisite urgency. Make weights configurable. Return top 5 gaps with current score, target, priority, evidence and
+learner-friendly reason. Include API, UI and unit tests.
+Prompt E — Learner dashboard
+ Build a responsive learner dashboard using #0A1931, #B3CFE5, #4A7FA7, #1A3D63 and #F6FAFD. Show overall readiness, a
+current-vs-target radar chart across four domains, top five gaps, recommended pathway, completed learning hours, latest quiz result and
+an AI tutor entry point.
+Load from actual API data; include empty/loading/error states; show why the next course is recommended; maintain high contrast and
+mobile accessibility.
+
+
+=== PAGE 3 ===
+STATWISE  Pending Work & Prompt Pack
+Page 3
+3. Catalogue and recommendation prompts
+Prompt F — iGOT-ready integration adapter
+ Design a CourseProvider adapter for STATWISE. Support MockIGOTProvider now and IGOTApiProvider later using
+IGOT_API_BASE_URL, IGOT_CLIENT_ID and IGOT_CLIENT_SECRET environment variables. Do not hardcode endpoints or claim live
+access without credentials.
+Normalize: provider, external_course_id, title, description, competencies_taught, difficulty, duration_hours, language, mode, url, rating,
+availability_status and last_synced_at. Add timeout, retries, cache, audit logs and fallback to last successful catalogue sync.
+Prompt G — NSSTA/TPAC programme module
+ Create an NSSTA/TPAC programme catalogue. Fields: programme_id, title, source, description, competencies, target role, level,
+online/classroom/blended mode, duration, location, schedule, nomination method, prerequisites, official source reference and verification
+date.
+Provide at least 15 clearly labelled demo records. Add admin CRUD/verification controls and filters for competency, role, mode, duration
+and date. Design it so seed records can later be replaced by approved data.
+Prompt H — Explainable recommender
+ Implement an explainable hybrid recommender. Retrieve options for priority gaps from iGOT-ready and NSSTA/TPAC catalogues;
+exclude completed courses and unmet prerequisites. Score using gap coverage 35%, role relevance 25%, difficulty fit 15%, prerequisite
+readiness 10%, department priority 10%, duration/language 5%.
+Return title, provider, competency, score, estimated duration, mode, prerequisites, why_recommended, next_step and enrolment
+URL/mock action. Sequence results Foundation → Core → Practice → Advanced. Provide fallback when no result qualifies.
+Prompt I — Semantic search enhancement
+ Add semantic search without replacing transparent rules. Generate embeddings from course title, description, objectives and tags. Store
+in FAISS, pgvector or a vector database. Use semantic retrieval only to find candidates, then combine it with the existing rule score. Add
+filters for provider, language, level, duration and mode. Persist recommendation reason and component scores. Provide fallback if vector
+search is unavailable.
+
+
+=== PAGE 4 ===
+STATWISE  Pending Work & Prompt Pack
+Page 4
+4. Assessment and tutor prompts
+Prompt J — Secure document upload
+ Implement secure upload for PDF, PPTX, DOCX, TXT and transcript text. Validate extension and MIME type on the server; impose
+file-size limit; sanitize names; generate unique storage IDs; reject malformed files; save uploader, hash, source type, access level and
+processing status. Only uploader, authorized trainers and admins may access source files. Provide clear client progress/errors and
+object-storage/local-volume support.
+Prompt K — Grounded MCQ pipeline
+ Build a document-grounded MCQ pipeline: extract text; preserve page/slide references; remove boilerplate; section-aware chunking;
+retrieve useful chunks; generate strict JSON; validate; save as drafts.
+MCQ must include question, exactly four options, correct option index, explanation, difficulty, Bloom level, competency IDs, source file ID,
+source page/slide, supporting source text, confidence and review status. Require evidence for correct answer; avoid
+all/none-of-the-above; never auto-publish.
+Prompt L — MCQ quality validator
+ Create an MCQ quality validator. Reject/flag: fewer/more than four options; invalid correct index; duplicate options; answer leaked in
+question; missing evidence/page; inconsistent explanation; duplicate/near-duplicate question; ambiguous wording; absent competency
+tag.
+Return pass/fail, executed checks, warnings, confidence, rejection reason and regeneration instruction. Include tests for valid and invalid
+examples.
+Prompt M — Trainer review and publishing
+ Build a trainer review workflow. Display original source page/slide beside each question. Allow edit, approve, reject, regenerate, duplicate
+and delete. Assemble approved questions into quiz with title, duration, attempts, passing score, dates and assigned cohort. Include
+preview, JSON/CSV export and an audit trail. Use statuses: Draft → Under Review → Approved → Published → Archived.
+Prompt N — Learner quiz and competency update
+ Build learner quiz flow: one question at a time, progress, optional timer, autosave, randomized option order, auto-submit on expiry and
+result page. Result shows score, answers, explanations, competency-wise performance and revision recommendations. Update
+competency evidence only from approved quizzes. Keep answers hidden until submission and support keyboard/mobile access.
+Prompt O — Source-grounded tutor
+ Implement a RAG AI tutor using only approved NSSTA material, trainer-approved uploads, curated course metadata and official
+glossaries. Retrieve source chunks before response. Every answer shows source title and page/slide. If evidence is absent, say it cannot
+be verified from approved material and direct the learner to a trainer/official reference. Enforce access permissions and collect
+helpful/not-helpful feedback.
+
+
+=== PAGE 5 ===
+STATWISE  Pending Work & Prompt Pack
+Page 5
+5. Administration, security and testing prompts
+Prompt P — Administrator dashboard
+ Implement a role-protected admin analytics dashboard. Show onboarded officials, active learners, learning hours, completion rate,
+domain scores, top gaps by department/designation, recommendation acceptance, quiz pass rates, pre/post improvement and provider
+usage. Add department, role, date, domain and provider filters. Default to aggregate data, mask very small cohorts and support
+CSV/printable export.
+Prompt Q — Security hardening
+ Audit and harden STATWISE. Implement server-side validation, parameterized ORM queries, bcrypt/Argon2 passwords, token
+expiry/session controls, RBAC, CORS allowlist, rate limits for login/upload/MCQ/chat, upload controls, environment-only secrets, HTTPS,
+CSP/HSTS/content-type/frame headers and audit logs for authentication, uploads, approvals and exports. Return a prioritized
+remediation checklist and code changes.
+Prompt R — End-to-end test plan
+ Create a manual and automated test plan for this journey: register/login → profile → baseline assessment → gap dashboard →
+recommendations → trainer upload → MCQ generation/review → learner quiz → score update → admin analytics.
+For each case provide test ID, user role, preconditions, action/input, expected result, negative case and priority. Include authorization,
+upload validation, API failure and concurrency/task-status cases.
+Prompt S — Demo seed data
+ Create realistic but clearly fictional STATWISE demo data: five personas (JSO, SSO, Data Analyst, ISS Officer, Trainer), competency
+scores, 30 iGOT-ready courses, 15 NSSTA/TPAC-style programmes, three source documents, 30 approved MCQs, three quizzes and
+aggregate analytics. Story: a JSO is strong in basics but weak in Python/GIS, follows a path, passes a quiz and improves competency.
+
+
+=== PAGE 6 ===
+STATWISE  Pending Work & Prompt Pack
+Page 6
+6. Docker: run on any development device
+Docker is the right addition. It packages your backend, frontend, PostgreSQL database, Redis queue and background
+worker with matching dependencies. Teammates can use the same command rather than manually configuring Python,
+Node.js, PostgreSQL and Redis. It does not remove the need to install Docker Desktop (Windows/macOS) or Docker
+Engine + Compose plugin (Linux).
+Recommended command
+From the repository root, run: docker compose up --build. Then open the frontend at http://localhost:3000 and
+FastAPI documentation at http://localhost:8000/docs. For a clean reset of local demo data, run: docker compose
+down -v and then start again.
+Recommended project structure
+ IGOT_stat/
+■■■ backend/
+■   ■■■ app/
+■   ■   ■■■ main.py
+■   ■   ■■■ celery_app.py
+■   ■   ■■■ api/  models/  services/  tasks/
+■   ■■■ requirements.txt
+■   ■■■ Dockerfile
+■   ■■■ .dockerignore
+■■■ frontend/
+■   ■■■ src/
+■   ■■■ package.json
+■   ■■■ Dockerfile
+■   ■■■ .dockerignore
+■■■ docker-compose.yml
+■■■ .env.example
+■■■ .gitignore
+■■■ README.md
+Backend Dockerfile — backend/Dockerfile
+ FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+Frontend Dockerfile — frontend/Dockerfile
+ FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+RUN npm run build
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+EXPOSE 3000
+CMD ["npm", "start"]
+
+
+=== PAGE 7 ===
+STATWISE  Pending Work & Prompt Pack
+Page 7
+Docker Compose — docker-compose.yml
+ services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-statwise}
+      POSTGRES_USER: ${POSTGRES_USER:-statwise_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-statwise_user}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-statwise}
+      REDIS_URL: redis://redis:6379/0
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+  worker:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-statwise_user}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-statwise}
+      REDIS_URL: redis://redis:6379/0
+      UPLOAD_DIR: /app/uploads
+    command: celery -A app.celery_app.celery_app worker --loglevel=info
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      backend:
+        condition: service_healthy
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+Environment template — .env.example
+ POSTGRES_DB=statwise
+POSTGRES_USER=statwise_user
+POSTGRES_PASSWORD=change_this_for_local_development
+SECRET_KEY=replace_with_a_long_random_value
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+CORS_ORIGINS=http://localhost:3000
+# Keep blank in prototype until approved credentials are issued
+IGOT_API_BASE_URL=
+IGOT_CLIENT_ID=
+IGOT_CLIENT_SECRET=
+LLM_PROVIDER=local
+MAX_UPLOAD_MB=20
+
+
+=== PAGE 8 ===
+STATWISE  Pending Work & Prompt Pack
+Page 8
+Important Docker notes
+1. Do not commit .env, credentials, local databases, model weights or uploaded official materials. Commit only
+.env.example. 2. The worker command assumes Celery is configured at app/celery_app.py; adjust the module name if yours
+differs. 3. For local demonstration, frontend uses localhost:8000. In cloud deployment, rebuild it with the public backend
+HTTPS URL. 4. Run database migrations/seed data from an entrypoint or a separate command after containers are healthy.
+5. Before showing the final demo, test the full stack on a teammate’s laptop using only the repository and Docker Compose.
+
+
+=== PAGE 9 ===
+STATWISE  Pending Work & Prompt Pack
+Page 9
+7. Docker prompt and final delivery prompts
+Prompt T — Generate Docker files for my exact repository
+ Inspect my STATWISE repository tree and generate production-aware Docker support without changing application behavior. Create
+backend/Dockerfile, frontend/Dockerfile, docker-compose.yml, backend/.dockerignore, frontend/.dockerignore, .env.example and
+README commands.
+Services required: frontend, FastAPI backend, PostgreSQL, Redis and Celery/RQ worker for MCQ generation. Add health checks,
+named volumes for PostgreSQL/Redis/uploads, environment variables, dependency ordering and localhost ports 3000/8000. Do not put
+real credentials in files. Ensure docker compose up --build works from a fresh clone.
+Prompt U — README and deployment readiness
+ Write a clean README for STATWISE: project purpose, feature list, architecture, local prerequisites, Docker quick start, environment
+variables, seed command, API docs, test commands, role descriptions, integration disclaimer, security notes, troubleshooting and demo
+credentials only if fictional. Make all commands copy-pasteable for Windows PowerShell, macOS and Linux.
+Prompt V — Final SIH readiness audit
+ Perform a final SIH readiness audit. Verify: one end-to-end flow works offline or with stable mock data; feature claims match what is truly
+implemented; iGOT integration is correctly labelled; trainer review exists before quiz publication; dashboard visuals are readable; error
+states work; secrets are not in Git; Docker launch works on another laptop; README is correct; backup demo video exists.
+Return a one-page go/no-go checklist ranked by blockers, demo risks and nice-to-haves.
+8. Do not skip these items
+ Do not present mock iGOT data as a confirmed live integration.  Do not auto-publish LLM-generated questions: require
+trainer approval.  Do not let a tutor answer beyond approved documents without a clear uncertainty response.  Do not
+expose personal learner data in organization analytics.  Do not hardcode keys, passwords or credentials.  Do not
+implement advanced reinforcement learning or fine-tuning until the core closed loop works.  Do not leave Docker untested
+on a second laptop before the final event.
+Best final-demo flow
+Learner login → role profile → baseline assessment → prioritized competency gaps → explainable iGOT + NSSTA/TPAC
+pathway → trainer uploads a training document → AI produces source-grounded MCQs → trainer approves quiz → learner
+takes quiz and sees feedback → competency score updates → administrator sees aggregate gaps and training need.
+
+
