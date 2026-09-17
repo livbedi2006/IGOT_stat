@@ -26,9 +26,9 @@ def test_all_api_endpoints():
     res = client.get("/api/auth/me")
     assert res.status_code == 200
     profile = res.json()
-    assert profile["learner"]["name"] == "Livjot Singh Bedi"
+    assert "name" in profile["learner"] and len(profile["learner"]["name"]) > 0
     assert "overall_readiness" in profile
-    print("[PASS] GET /api/auth/me (Livjot Singh Bedi - JSO profile verified)")
+    print(f"[PASS] GET /api/auth/me ({profile['learner']['name']} - {profile['learner'].get('role_code', 'JSO')} profile verified)")
 
     # 3. Competency Profile & Gaps
     res = client.get("/api/competency/profile")

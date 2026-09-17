@@ -12,8 +12,8 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: learner?.name || "Livjot Singh Bedi",
-    official_email: learner?.official_email || "livjot.bedi@mospi.gov.in",
+    full_name: learner?.name || "Statistical Officer",
+    official_email: learner?.official_email || "officer@mospi.gov.in",
     designation: learner?.designation || "Junior Statistical Officer",
     department: learner?.department || "Data Informatics & Innovation Division (DIID)",
     current_assignment: learner?.current_assignment || "PLFS Microdata Scrutiny & Automated Tabulation",
@@ -23,6 +23,19 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
     previous_training: learner?.previous_training || "Foundation Course on Official Statistics (NSSTA 2023)",
     career_goal: learner?.career_goal || "Promotion to Senior Statistical Officer and Lead Data Science Division"
   });
+
+  React.useEffect(() => {
+    if (learner && !isEditing) {
+      setFormData(prev => ({
+        ...prev,
+        full_name: learner.name || prev.full_name,
+        official_email: learner.official_email || prev.official_email,
+        designation: learner.designation || prev.designation,
+        department: learner.department || prev.department,
+        current_assignment: learner.current_assignment || prev.current_assignment
+      }));
+    }
+  }, [learner, isEditing]);
 
   const [saveStatus, setSaveStatus] = useState("");
   const [isSaving, setIsSaving] = useState(false);

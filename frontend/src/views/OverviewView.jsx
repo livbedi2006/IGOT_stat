@@ -17,14 +17,14 @@ export function OverviewView({ profileData, onNavigate }) {
     Behavioural: 72
   };
 
-  const learnerName = profileData?.learner?.name?.split(" ")[0] || "Livjot";
+  const learnerName = profileData?.learner?.name ? profileData.learner.name.split(" ")[0] : "Officer";
 
   return (
     <div className="space-y-6">
       {/* Top Welcome Title */}
       <div>
         <h2 className="text-2xl font-bold text-statwise-navy tracking-tight">
-          Good morning, {learnerName}
+          Welcome, {profileData?.learner?.name || "Statistical Officer"}
         </h2>
         <p className="text-sm text-statwise-muted mt-0.5">
           Your next best learning action is ready.

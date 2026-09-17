@@ -317,10 +317,10 @@ ROLE_PROFILES = {
 
 # Demo Persona Seed Profiles (Prompt S)
 DEMO_PERSONAS = {
-    "usr_livjot_26101": {
-        "user_id": "usr_livjot_26101",
-        "name": "Livjot Singh Bedi",
-        "official_email": "livjot.bedi@mospi.gov.in",
+    "usr_officer_default": {
+        "user_id": "usr_officer_default",
+        "name": "Statistical Officer",
+        "official_email": "officer@mospi.gov.in",
         "designation": "Junior Statistical Officer",
         "role_code": "JSO",
         "department": "Data Informatics & Innovation Division (DIID)",
@@ -362,6 +362,8 @@ DEMO_PERSONAS = {
         }
     }
 }
+# Backward compatibility alias
+DEMO_PERSONAS["usr_livjot_26101"] = DEMO_PERSONAS["usr_officer_default"]
 
 
 class CompetencyService:
@@ -373,8 +375,8 @@ class CompetencyService:
         self.weight_assignment = 0.15
         self.weight_prereq = 0.10
 
-        self.learner_state = copy.deepcopy(DEMO_PERSONAS["usr_livjot_26101"])
-        self.learner_state["id"] = self.learner_state.get("user_id", "usr_livjot_26101")
+        self.learner_state = copy.deepcopy(DEMO_PERSONAS["usr_officer_default"])
+        self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
         self.learner_state["role"] = self.learner_state.get("role_code", "JSO")
 
     def update_onboarding_profile(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -395,7 +397,7 @@ class CompetencyService:
                     self.learner_state["full_name"] = profile_data[field]
 
         # Keep id and role aliases synced
-        self.learner_state["id"] = self.learner_state.get("user_id", "usr_livjot_26101")
+        self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
         self.learner_state["role"] = self.learner_state.get("role_code", "JSO")
 
         # Sync role code if designation matches known cadres
@@ -555,7 +557,7 @@ class CompetencyService:
             prof = ROLE_PROFILES[role_code]
             self.learner_state["role_code"] = role_code
             self.learner_state["role"] = role_code
-            self.learner_state["id"] = self.learner_state.get("user_id", "usr_livjot_26101")
+            self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
             self.learner_state["designation"] = prof["title"]
             self.learner_state["department"] = prof["department"]
             self.learner_state["experience_years"] = prof.get("typical_experience", "5 years")

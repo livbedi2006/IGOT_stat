@@ -179,7 +179,7 @@ def update_learner_profile(req: OnboardingProfileUpdateRequest, request: Request
     client_ip = request.client.host if request.client else "127.0.0.1"
     updates = req.dict(exclude_unset=True)
     updated = competency_svc.update_onboarding_profile(updates)
-    user_id = updated["learner"].get("id") or updated["learner"].get("user_id") or "usr_livjot_26101"
+    user_id = updated["learner"].get("id") or updated["learner"].get("user_id") or "usr_officer_default"
     user_role = updated["learner"].get("role") or updated["learner"].get("role_code") or "JSO"
     security_audit_logger.log_event(
         event_type="PROFILE_UPDATE",

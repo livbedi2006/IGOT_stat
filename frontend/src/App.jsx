@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
+import { UserIdentificationModal } from "./components/UserIdentificationModal";
 import { OverviewView } from "./views/OverviewView";
 import { CompetencyView } from "./views/CompetencyView";
 import { LearningPathView } from "./views/LearningPathView";
@@ -21,6 +22,7 @@ export function App() {
   const [recommendations, setRecommendations] = useState([]);
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showIdentifyModal, setShowIdentifyModal] = useState(false);
 
   // Load initial profile, learning path and recommendations
   const refreshUserData = async () => {
@@ -43,6 +45,11 @@ export function App() {
   };
 
   useEffect(() => {
+    // Check if user has already identified in this device session
+    const hasIdentified = sessionStorage.getItem("statwise_officer_identified");
+    if (!hasIdentified) {
+      setShowIdentifyModal(true);
+    }
     refreshUserData();
   }, []);
 
@@ -55,6 +62,29 @@ export function App() {
       setLearningPathData(path);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleIdentifyUser = async ({ name, role_code, department, current_assignment }) => {
+    try {
+      sessionStorage.setItem("statwise_officer_identified", "true");
+      localStorage.setItem("statwise_saved_name", name);
+      localStorage.setItem("statwise_saved_role", role_code);
+      localStorage.setItem("statwise_saved_dept", department);
+
+      setCurrentRole(role_code);
+      await api.switchRole(role_code);
+      await api.updateProfile({
+        full_name: name,
+        name: name,
+        department,
+        current_assignment,
+        role_code
+      });
+      await refreshUserData();
+      setShowIdentifyModal(false);
+    } catch (err) {
+      console.error("Failed to identify user:", err);
     }
   };
 
@@ -74,6 +104,7 @@ export function App() {
         currentRole={currentRole}
         onRoleChange={handleRoleChange}
         learner={profileData?.learner}
+        onOpenIdentifyModal={() => setShowIdentifyModal(true)}
       />
 
       <div className="flex flex-1">
@@ -125,6 +156,15 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/* Cadre & User Identification Onboarding Modal */}
+      <UserIdentificationModal
+        isOpen={showIdentifyModal}
+        onClose={() => setShowIdentifyModal(false)}
+        onIdentify={handleIdentifyUser}
+        initialProfile={profileData?.learner}
+        canDismiss={Boolean(sessionStorage.getItem("statwise_officer_identified"))}
+      />
     </div>
   );
 }

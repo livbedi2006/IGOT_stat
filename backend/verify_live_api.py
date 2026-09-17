@@ -81,7 +81,7 @@ def run_live_fastapi_audit():
         ("GET", "/openapi.json", None, "OpenAPI 3.1.0 Specification Schema"),
 
         # 2. Auth & Profile
-        ("GET", "/api/auth/me", None, "Get Current Profile (Livjot Singh Bedi)"),
+        ("GET", "/api/auth/me", None, "Get Current Profile (MoSPI Statistical Officer)"),
         ("POST", "/api/auth/switch-role", {"role_code": "SSO"}, "Switch Role to Senior Statistical Officer (SSO)"),
         ("POST", "/api/auth/switch-role", {"role_code": "JSO"}, "Switch Role to Junior Statistical Officer (JSO)"),
 

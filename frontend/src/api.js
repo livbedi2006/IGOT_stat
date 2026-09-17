@@ -31,6 +31,10 @@ export const api = {
     method: "POST",
     body: JSON.stringify({ role_code: roleCode })
   }),
+  updateProfile: (profileData) => request("/api/auth/profile", {
+    method: "PUT",
+    body: JSON.stringify(profileData)
+  }),
 
   // Learning Path & Recommendations
   getLearningPath: () => request("/api/courses/learning-path"),
