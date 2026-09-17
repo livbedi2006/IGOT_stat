@@ -17,19 +17,19 @@
 - [x] Task 2.7: Test all backend API endpoints (`backend/test_endpoints.py`).
 
 ## Phase 3: Frontend Web Application (STATWISE Screenbook Design System)
-- [ ] Task 3.1: Initialize Vite React app with Tailwind CSS and install dependencies (`lucide-react`, `recharts`, `canvas-confetti`).
-- [ ] Task 3.2: Configure STATWISE palette (`#0A1931`, `#1A3D63`, `#4A7FA7`, `#B3CFE5`, `#F6FAFD`) and typography.
-- [ ] Task 3.3: Build shell navigation: MoSPI header, official emblems, user badge, and STATWISE sidebar.
-- [ ] Task 3.4: Build Screen 01 - Overview (Learner Home with readiness KPIs, priority gaps, recommended next step, skill health).
-- [ ] Task 3.5: Build Screen 02 - Competency Profile (Interactive Radar Chart, Target vs Mastery overlay, Top Gaps).
-- [ ] Task 3.6: Build Screen 03 - Learning Path (Sequenced timeline: Foundation, Core, Practice, Advanced with status).
-- [ ] Task 3.7: Build Screen 04 - Recommendations (Multi-criteria filterable catalogue with explainable match reasons).
-- [ ] Task 3.8: Build Screen 05 - Assessments (Trainer/Admin MCQ studio with file drop, Bloom's difficulty selector, grounded preview, export).
-- [ ] Task 3.9: Build Screen 06 - Proctored Quiz Player (Live webcam feed simulation, integrity monitor, instant feedback with citations).
-- [ ] Task 3.10: Build Screen 07 - Statistical AI Tutor (Conversational grounded tutor with official MoSPI citations).
-- [ ] Task 3.11: Build Screen 08 - Admin Analytics & Heatmaps (Org KPIs, department heatmap, emerging skill forecasts, ML model diagnostics modal).
-- [ ] Task 3.12: Build Screen 09 - Profile & Settings (Official credentials, DPDP Act 2023 toggles, role switcher).
-- [ ] Task 3.13: Build Screen 10 - MoSPI Virtual Lab (Interactive statistical exploration of PLFS, CPI, IIP data).
+- [x] Task 3.1: Initialize Vite React app with Tailwind CSS and install dependencies (`lucide-react`, `recharts`, `canvas-confetti`).
+- [x] Task 3.2: Configure STATWISE palette (`#0A1931`, `#1A3D63`, `#4A7FA7`, `#B3CFE5`, `#F6FAFD`) and typography.
+- [x] Task 3.3: Build shell navigation: MoSPI header, official emblems, user badge, and STATWISE sidebar.
+- [x] Task 3.4: Build Screen 01 - Overview (Learner Home with readiness KPIs, priority gaps, recommended next step, skill health).
+- [x] Task 3.5: Build Screen 02 - Competency Profile (Interactive Radar Chart, Target vs Mastery overlay, Top Gaps).
+- [x] Task 3.6: Build Screen 03 - Learning Path (Sequenced timeline: Foundation, Core, Practice, Advanced with status).
+- [x] Task 3.7: Build Screen 04 - Recommendations (Multi-criteria filterable catalogue with explainable match reasons).
+- [x] Task 3.8: Build Screen 05 - Assessments (Trainer/Admin MCQ studio with file drop, Bloom's difficulty selector, grounded preview, export).
+- [x] Task 3.9: Build Screen 06 - Proctored Quiz Player (Live webcam feed simulation, integrity monitor, instant feedback with citations).
+- [x] Task 3.10: Build Screen 07 - Statistical AI Tutor (Conversational grounded tutor with official MoSPI citations).
+- [x] Task 3.11: Build Screen 08 - Admin Analytics & Heatmaps (Org KPIs, department heatmap, emerging skill forecasts, ML model diagnostics modal).
+- [x] Task 3.12: Build Screen 09 - Profile & Settings (Official credentials, DPDP Act 2023 toggles, role switcher).
+- [x] Task 3.13: Build Screen 10 - MoSPI Virtual Lab (Interactive statistical exploration of PLFS, CPI, IIP data).
 
 ## Phase 4: Integration, Verification & Visual Quality
 - [ ] Task 4.1: Connect frontend to FastAPI backend and verify real-time data flows.
