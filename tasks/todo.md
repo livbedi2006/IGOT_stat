@@ -1,11 +1,11 @@
 # STATWISE Implementation Task List
 
 ## Phase 1: Machine Learning & Analytics Engines (Non-overfitting ML Core)
-- [ ] Task 1.1: Implement regularized Skill Demand Forecasting Model (`backend/ml/skill_forecasting_model.py`) with cross-validation and diagnostics.
-- [ ] Task 1.2: Implement regularized Bloom's Taxonomy NLP Classifier (`backend/ml/blooms_classifier.py`).
-- [ ] Task 1.3: Implement Hybrid Recommendation Engine (`backend/ml/recommender_engine.py`) with multi-attribute scoring and DAG prerequisite solver.
-- [ ] Task 1.4: Implement AI Proctoring Anomaly Detector (`backend/ml/proctoring_detector.py`).
-- [ ] Task 1.5: Write unit and cross-validation tests (`backend/test_ml_models.py`) verifying generalization and absence of overfitting.
+- [x] Task 1.1: Implement regularized Skill Demand Forecasting Model (`backend/ml/skill_forecasting_model.py`) with cross-validation and diagnostics.
+- [x] Task 1.2: Implement regularized Bloom's Taxonomy NLP Classifier (`backend/ml/blooms_classifier.py`).
+- [x] Task 1.3: Implement Hybrid Recommendation Engine (`backend/ml/recommender_engine.py`) with multi-attribute scoring and DAG prerequisite solver.
+- [x] Task 1.4: Implement AI Proctoring Anomaly Detector (`backend/ml/proctoring_detector.py`).
+- [x] Task 1.5: Write unit and cross-validation tests (`backend/test_ml_models.py`) verifying generalization and absence of overfitting.
 
 ## Phase 2: Backend API & MoSPI Domain Services
 - [ ] Task 2.1: Implement Competency Framework Service (`backend/services/competency_service.py`) for 4 domains and 100+ competencies.
