@@ -32,6 +32,6 @@
 - [x] Task 3.13: Build Screen 10 - MoSPI Virtual Lab (Interactive statistical exploration of PLFS, CPI, IIP data).
 
 ## Phase 4: Integration, Verification & Visual Quality
-- [ ] Task 4.1: Connect frontend to FastAPI backend and verify real-time data flows.
-- [ ] Task 4.2: Run automated end-to-end backend tests.
-- [ ] Task 4.3: Verify all views using Browser Subagent and capture visual evidence for walkthrough.
+- [x] Task 4.1: Connect frontend to FastAPI backend and verify real-time data flows.
+- [x] Task 4.2: Run automated end-to-end backend tests.
+- [x] Task 4.3: Verify all views using Browser Subagent and capture visual evidence for walkthrough.

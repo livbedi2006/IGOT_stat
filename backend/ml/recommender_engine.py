@@ -1,13 +1,3 @@
-"""
-Hybrid Learning Recommender Engine for MoSPI STATWISE Platform.
-Implements:
-1. Semantic relevance matching against learner's skill gap vector.
-2. Knowledge Graph prerequisite constraints (DAG prerequisite resolution).
-3. Multi-Criteria Utility Ranking:
-   Total Score = 0.40 * Relevance + 0.25 * Difficulty_Match + 0.15 * Duration_Fit + 0.20 * Rating.
-4. Seamless blended recommendations combining iGOT Karmayogi online courses and NSSTA TPAC in-person programmes.
-"""
-
 from typing import List, Dict, Any
 import numpy as np
 

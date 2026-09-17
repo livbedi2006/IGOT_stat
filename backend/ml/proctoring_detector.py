@@ -1,15 +1,3 @@
-"""
-AI Proctoring Anomaly Detector for STATWISE Online Assessments.
-Evaluates multi-modal behavioral signals:
-- Face Presence (0 = no face detected, 1 = single verified user, >1 = multi-person alert)
-- Gaze Vector Deviation (degrees from center)
-- Browser Tab Focus / Window Blur events
-- Audio Spike / Ambient Speech activity
-
-Calculates a calibrated composite anomaly score in [0, 100].
-Signals > 80% are flagged as High Risk with explanation for audit review.
-"""
-
 from typing import Dict, Any, List
 import numpy as np
 

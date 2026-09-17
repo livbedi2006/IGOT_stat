@@ -1,14 +1,3 @@
-"""
-Bloom's Taxonomy MCQ Cognitive Level & Difficulty Classifier.
-Classifies questions into:
-- Easy: Remember / Understand
-- Medium: Apply / Analyze
-- Hard: Evaluate / Synthesize
-
-Combines pedagogical action-verb lexical representations with TF-IDF n-grams and L2-regularized logistic regression.
-Strictly prevents overfitting through cross-validation and regularized shrinkage.
-"""
-
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
