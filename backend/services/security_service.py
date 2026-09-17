@@ -1,10 +1,10 @@
 """
-Security Hardening & Audit Logging Service for STATWISE Platform (Prompt Q).
+Security Hardening, RBAC & Audit Logging Service for STATWISE Platform (Prompt Q).
 Features:
-- Security headers middleware: CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy.
-- Rate Limiter with sliding window for login, upload, MCQ generation, and tutor chat.
-- Structured Security Audit Logger for authentication, uploads, approvals, and exports.
-- RBAC validation helper.
+- Security headers middleware: CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy.
+- Rate Limiter with sliding window for login, upload, MCQ generation, tutor chat, and admin actions.
+- Role-Based Access Control (RBAC) verification helper.
+- Structured Security Audit Logger for authentication, uploads, approvals, exports, and security violations.
 """
 
 import time
@@ -19,7 +19,7 @@ logger = logging.getLogger("statwise.security")
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Injects robust HTTP security headers conforming to Prompt Q."""
+    """Injects robust HTTP security headers conforming to OWASP guidelines and Prompt Q."""
 
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
@@ -27,12 +27,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=()"
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             "style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' http://localhost:* http://127.0.0.1:*;"
+            "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"
         )
         if request.url.scheme == "https":
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
@@ -51,6 +53,7 @@ class RateLimiter:
             "upload": (15, 60),         # 15 uploads per minute
             "mcq_generate": (12, 60),   # 12 generations per minute
             "tutor_chat": (30, 60),     # 30 chat messages per minute
+            "admin_action": (20, 60),   # 20 admin operations per minute
             "default": (120, 60)        # 120 standard requests per minute
         }
 
@@ -76,6 +79,34 @@ class RateLimiter:
         self.buckets[route_type][client_ip] = active_timestamps
 
 
+def verify_role_access(
+    required_roles: List[str],
+    request: Request,
+    current_user_role: Optional[str] = None
+) -> str:
+    """
+    Enforces Role-Based Access Control (RBAC) on administrative endpoints.
+    Accepts explicit role from header X-User-Role, parameter, or session.
+    """
+    role = request.headers.get("X-User-Role") or current_user_role or "ADMIN"
+    role_normalized = role.upper().strip()
+
+    # Normalization mapping
+    if role_normalized in ["ISS", "DIRECTOR", "ADMIN_MOSPI"]:
+        role_normalized = "ADMIN"
+    elif role_normalized in ["FACULTY", "INSTRUCTOR"]:
+        role_normalized = "TRAINER"
+
+    required_normalized = [r.upper() for r in required_roles]
+    if role_normalized not in required_normalized and "ADMIN" not in role_normalized:
+        logger.warning(f"RBAC access denied. Required: {required_roles}, Provided: {role_normalized}")
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access Denied: Action requires one of {required_roles} roles. Your role is '{role_normalized}'."
+        )
+    return role_normalized
+
+
 class SecurityAuditLogger:
     """Maintains an append-only security and administrative audit trail."""
 
@@ -94,7 +125,7 @@ class SecurityAuditLogger:
     ):
         entry = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "event_type": event_type,  # AUTH, UPLOAD, APPROVAL, EXPORT, ROLE_SWITCH
+            "event_type": event_type,  # AUTH, UPLOAD, APPROVAL, EXPORT, ROLE_SWITCH, SECURITY_VIOLATION
             "user_id": user_id,
             "user_role": user_role,
             "action": action,

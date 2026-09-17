@@ -124,8 +124,24 @@ UNCERTAINTY_RESPONSE = (
 )
 
 
+import re
+
+PROMPT_INJECTION_PATTERNS = [
+    r"ignore\s+(all\s+)?(previous|prior)\s+instructions",
+    r"system\s+prompt",
+    r"developer\s+mode",
+    r"jailbreak",
+    r"dan\s+mode",
+    r"disregard\s+all",
+    r"<script",
+    r"drop\s+table",
+    r"exec\(",
+    r"eval\("
+]
+
+
 class TutorService:
-    """Source-grounded RAG Tutor with strict uncertainty fallback and feedback telemetry."""
+    """Source-grounded RAG Tutor with strict uncertainty fallback, injection defense, and feedback telemetry."""
 
     def __init__(self):
         self.passages = KNOWLEDGE_PASSAGES
@@ -134,10 +150,28 @@ class TutorService:
     def answer_query(self, user_query: str) -> Dict[str, Any]:
         """
         Retrieves grounded passage with page/slide references.
-        Returns strict uncertainty fallback when evidence is insufficient (Prompt O).
+        Returns strict uncertainty fallback when evidence is insufficient or prompt injection detected (Prompt O).
         """
         message_id = f"msg_{uuid.uuid4().hex[:8]}"
-        clean_q = user_query.lower().replace("?", "").replace(",", "").replace(".", "")
+
+        # Security: Strip HTML tags to prevent reflected XSS (OWASP A03)
+        sanitized_query = re.sub(r"<[^>]+>", "", user_query).strip()
+
+        # Security: Check for adversarial prompt injection patterns (OWASP LLM01)
+        lower_q = sanitized_query.lower()
+        for pattern in PROMPT_INJECTION_PATTERNS:
+            if re.search(pattern, lower_q):
+                return {
+                    "message_id": message_id,
+                    "query": sanitized_query,
+                    "answer": UNCERTAINTY_RESPONSE,
+                    "sources": [],
+                    "is_grounded": False,
+                    "confidence": 0.0,
+                    "status": "UNCERTAINTY_FALLBACK"
+                }
+
+        clean_q = lower_q.replace("?", "").replace(",", "").replace(".", "")
         query_words = set(clean_q.split())
 
         best_match = None
@@ -163,7 +197,7 @@ class TutorService:
         if best_match and best_score >= 2:
             return {
                 "message_id": message_id,
-                "query": user_query,
+                "query": sanitized_query,
                 "answer": best_match["answer"],
                 "sources": best_match["sources"],
                 "is_grounded": True,
@@ -174,7 +208,7 @@ class TutorService:
         # Prompt O & Section 8 mandatory constraint: Uncertainty fallback
         return {
             "message_id": message_id,
-            "query": user_query,
+            "query": sanitized_query,
             "answer": UNCERTAINTY_RESPONSE,
             "sources": [
                 {

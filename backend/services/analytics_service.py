@@ -108,6 +108,8 @@ class AdminAnalyticsService:
             ],
             "departments_breakdown": processed_depts,
             "roles_breakdown": processed_roles,
+            "data_protection_act": "DPDP Act 2023",
+            "small_cohorts_masked": mask_small_cohorts,
             "privacy_notice": "In compliance with MoSPI Data Confidentiality and DPDP Act 2023, cohorts with fewer than 3 individuals are masked to prevent personal re-identification."
         }
 

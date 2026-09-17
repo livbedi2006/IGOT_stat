@@ -18,12 +18,12 @@ from services.mcq_service import mcq_service, MCQService
 from services.igot_adapter import igot_course_provider, DISCLAIMER_TEXT
 from services.nssta_adapter import nssta_programme_service
 from services.igot_nssta_service import course_catalogue_service
-from services.upload_service import upload_service
+from services.upload_service import upload_service, sanitize_filename, MAX_UPLOAD_BYTES
 from services.mcq_validator import mcq_validator
 from services.tutor_service import tutor_service
 from services.dataset_service import DatasetService
 from services.analytics_service import admin_analytics_service
-from services.security_service import SecurityHeadersMiddleware, rate_limiter, security_audit_logger
+from services.security_service import SecurityHeadersMiddleware, rate_limiter, security_audit_logger, verify_role_access
 
 
 app = FastAPI(
@@ -35,14 +35,34 @@ app = FastAPI(
 # Prompt Q: Security Headers Middleware
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Enable CORS for local React/Vite development
+# Prompt Q: Hardened CORS configuration (OWASP A05)
+ALLOWED_ORIGINS = [
+    orig.strip() for orig in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+    ).split(",") if orig.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Defense-in-Depth: Global Exception Handler prevents stack trace leakage (OWASP A05 / CWE-209)
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import logging
+    logging.getLogger("statwise.api").error(
+        f"Unhandled exception on {request.method} {request.url.path}: {str(exc)}",
+        exc_info=True
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An internal server error occurred. Please contact the MoSPI DIID administrator."}
+    )
 
 # Instantiate singleton core services
 competency_svc = CompetencyService()
@@ -52,88 +72,88 @@ proctoring_detector = ProctoringAnomalyDetector()
 blooms_classifier = BloomsTaxonomyClassifier()
 
 
-# --- Pydantic Request Models ---
+# --- Pydantic Request Models with Strict Boundary Constraints (OWASP A03 / CWE-20) ---
 class FrameTelemetryRequest(BaseModel):
-    face_count: int = 1
-    gaze_deviation_deg: float = 0.0
+    face_count: int = Field(1, ge=0, le=10)
+    gaze_deviation_deg: float = Field(0.0, ge=0.0, le=180.0)
     is_tab_focused: bool = True
-    audio_db_level: float = 25.0
+    audio_db_level: float = Field(25.0, ge=0.0, le=150.0)
     voice_detected: bool = False
 
 class TutorChatRequest(BaseModel):
-    query: str
+    query: str = Field(..., min_length=1, max_length=2000)
 
 class TutorFeedbackRequest(BaseModel):
-    message_id: str
+    message_id: str = Field(..., max_length=100)
     helpful: bool
-    user_comment: Optional[str] = None
+    user_comment: Optional[str] = Field(None, max_length=1000)
 
 class SwitchRoleRequest(BaseModel):
-    role_code: str  # "JSO", "SSO", "ANALYST", "ISS", "TRAINER"
+    role_code: str = Field(..., min_length=2, max_length=20)  # "JSO", "SSO", "ANALYST", "ISS", "TRAINER"
 
 class OnboardingProfileUpdateRequest(BaseModel):
-    full_name: Optional[str] = None
-    official_email: Optional[str] = None
-    designation: Optional[str] = None
-    department: Optional[str] = None
-    current_assignment: Optional[str] = None
-    experience_years: Optional[float] = None
-    qualification: Optional[str] = None
-    preferred_language: Optional[str] = None
-    previous_training: Optional[str] = None
-    career_goal: Optional[str] = None
+    full_name: Optional[str] = Field(None, max_length=150)
+    official_email: Optional[str] = Field(None, max_length=150)
+    designation: Optional[str] = Field(None, max_length=150)
+    department: Optional[str] = Field(None, max_length=200)
+    current_assignment: Optional[str] = Field(None, max_length=300)
+    experience_years: Optional[float] = Field(None, ge=0.0, le=50.0)
+    qualification: Optional[str] = Field(None, max_length=150)
+    preferred_language: Optional[str] = Field(None, max_length=100)
+    previous_training: Optional[str] = Field(None, max_length=300)
+    career_goal: Optional[str] = Field(None, max_length=300)
 
 class QuizSubmissionRequest(BaseModel):
-    assessment_id: str
+    assessment_id: str = Field(..., max_length=100)
     answers: Dict[str, str]
-    proctoring_violations_count: int = 0
-    final_integrity_score: float = 95.0
+    proctoring_violations_count: int = Field(0, ge=0)
+    final_integrity_score: float = Field(95.0, ge=0.0, le=100.0)
 
 class ExerciseVerificationRequest(BaseModel):
-    exercise_id: str
-    user_answer: str
+    exercise_id: str = Field(..., max_length=100)
+    user_answer: str = Field(..., max_length=500)
 
 class MCQExportRequest(BaseModel):
-    assessment_id: str
-    format: str = "json"  # "json", "qti", "moodle", "csv"
+    assessment_id: str = Field(..., max_length=100)
+    format: str = Field("json", max_length=20)  # "json", "qti", "moodle", "csv"
 
 class ApproveMCQRequest(BaseModel):
-    trainer_id: str = "trainer_dr_sunita"
+    trainer_id: str = Field("trainer_dr_sunita", max_length=100)
 
 class RejectMCQRequest(BaseModel):
-    reason: str
-    trainer_id: str = "trainer_dr_sunita"
+    reason: str = Field(..., min_length=1, max_length=1000)
+    trainer_id: str = Field("trainer_dr_sunita", max_length=100)
 
 class UpdateMCQRequest(BaseModel):
-    question: Optional[str] = None
+    question: Optional[str] = Field(None, max_length=2000)
     options: Optional[List[Dict[str, str]]] = None
-    correct_answer: Optional[str] = None
-    explanation: Optional[str] = None
-    competency_key: Optional[str] = None
-    difficulty: Optional[str] = None
+    correct_answer: Optional[str] = Field(None, max_length=500)
+    explanation: Optional[str] = Field(None, max_length=2000)
+    competency_key: Optional[str] = Field(None, max_length=100)
+    difficulty: Optional[str] = Field(None, max_length=50)
 
 class CreateQuizRequest(BaseModel):
-    title: str
+    title: str = Field(..., min_length=3, max_length=200)
     question_ids: List[str]
-    duration_minutes: int = 25
-    passing_score: int = 60
-    assigned_cohort: str = "JSO_SSO_Cadre"
-    trainer_id: str = "trainer_dr_sunita"
+    duration_minutes: int = Field(25, ge=1, le=180)
+    passing_score: int = Field(60, ge=10, le=100)
+    assigned_cohort: str = Field("JSO_SSO_Cadre", max_length=100)
+    trainer_id: str = Field("trainer_dr_sunita", max_length=100)
 
 class CreateProgrammeRequest(BaseModel):
-    title: str
-    source: str = "NSSTA Greater Noida / MoSPI TPAC"
-    description: str
+    title: str = Field(..., min_length=3, max_length=200)
+    source: str = Field("NSSTA Greater Noida / MoSPI TPAC", max_length=200)
+    description: str = Field(..., min_length=5, max_length=2000)
     competencies: List[str]
     target_role: List[str]
-    level: str = "Intermediate"
-    mode: str = "Classroom"
-    duration: str = "5 Days"
-    location: str = "NSSTA Campus, Greater Noida, UP"
-    schedule: str = "2026-11-01 to 2026-11-05"
-    nomination_method: str = "Official Cadre Administrative Allocation"
+    level: str = Field("Intermediate", max_length=50)
+    mode: str = Field("Classroom", max_length=50)
+    duration: str = Field("5 Days", max_length=100)
+    location: str = Field("NSSTA Campus, Greater Noida, UP", max_length=200)
+    schedule: str = Field("2026-11-01 to 2026-11-05", max_length=100)
+    nomination_method: str = Field("Official Cadre Administrative Allocation", max_length=200)
     prerequisites: List[str] = []
-    official_source_reference: str = "NSSTA Annual Training Calendar 2025-26"
+    official_source_reference: str = Field("NSSTA Annual Training Calendar 2025-26", max_length=200)
 
 
 # --- Health & Baseline Checks ---
@@ -266,35 +286,53 @@ def list_nssta_programmes(
     }
 
 @app.post("/api/nssta/programmes")
-def create_nssta_programme(req: CreateProgrammeRequest):
+def create_nssta_programme(req: CreateProgrammeRequest, request: Request = None):
+    client_ip = request.client.host if request and request.client else "127.0.0.1"
+    rate_limiter.check_rate_limit("admin_action", client_ip)
+    role = verify_role_access(["ADMIN", "TRAINER"], request) if request else "ADMIN"
     data = req.dict()
     created = nssta_programme_service.create_programme(data)
     security_audit_logger.log_event(
         event_type="ADMIN_CREATE",
         user_id="admin_mospi",
-        user_role="ADMIN",
-        action=f"Created NSSTA programme {created['programme_id']}"
+        user_role=role,
+        action=f"Created NSSTA programme {created['programme_id']}",
+        ip_address=client_ip
     )
     return created
 
 @app.put("/api/nssta/programmes/{programme_id}/verify")
-def verify_nssta_programme(programme_id: str):
+def verify_nssta_programme(programme_id: str, request: Request = None):
+    client_ip = request.client.host if request and request.client else "127.0.0.1"
+    rate_limiter.check_rate_limit("admin_action", client_ip)
+    role = verify_role_access(["ADMIN"], request) if request else "ADMIN"
     verified = nssta_programme_service.verify_programme(programme_id)
     if not verified:
         raise HTTPException(status_code=404, detail=f"Programme {programme_id} not found.")
     security_audit_logger.log_event(
         event_type="ADMIN_VERIFY",
         user_id="admin_mospi",
-        user_role="ADMIN",
-        action=f"Verified NSSTA programme {programme_id}"
+        user_role=role,
+        action=f"Verified NSSTA programme {programme_id}",
+        ip_address=client_ip
     )
     return verified
 
 @app.delete("/api/nssta/programmes/{programme_id}")
-def delete_nssta_programme(programme_id: str):
+def delete_nssta_programme(programme_id: str, request: Request = None):
+    client_ip = request.client.host if request and request.client else "127.0.0.1"
+    rate_limiter.check_rate_limit("admin_action", client_ip)
+    role = verify_role_access(["ADMIN"], request) if request else "ADMIN"
     success = nssta_programme_service.delete_programme(programme_id)
     if not success:
         raise HTTPException(status_code=404, detail=f"Programme {programme_id} not found.")
+    security_audit_logger.log_event(
+        event_type="ADMIN_DELETE",
+        user_id="admin_mospi",
+        user_role=role,
+        action=f"Deleted NSSTA programme {programme_id}",
+        ip_address=client_ip
+    )
     return {"status": "DELETED", "programme_id": programme_id}
 
 
@@ -360,7 +398,7 @@ def list_documents():
 async def generate_mcq_from_document(
     file: Optional[UploadFile] = File(None),
     raw_text: Optional[str] = Form(None),
-    num_questions: int = Form(5),
+    num_questions: int = Form(5, ge=1, le=50),
     target_difficulty: str = Form("Mixed"),
     request: Request = None
 ):
@@ -370,14 +408,18 @@ async def generate_mcq_from_document(
     extracted_text = ""
     filename = "Official_Training_Document.pdf"
     if file:
-        filename = file.filename
+        filename = sanitize_filename(file.filename or "uploaded_training_doc.pdf")
         content = await file.read()
+        if len(content) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail=f"File exceeds maximum allowed size of {MAX_UPLOAD_BYTES // (1024*1024)} MB.")
         if filename.lower().endswith(".pdf"):
+            if not content.startswith(b"%PDF-"):
+                raise HTTPException(status_code=400, detail="Security validation failed: File does not match authentic PDF signature.")
             extracted_text = mcq_service.extract_text_from_pdf(content)
         else:
             extracted_text = content.decode("utf-8", errors="ignore")
     elif raw_text:
-        extracted_text = raw_text
+        extracted_text = raw_text[:50000]  # Bound input length to prevent resource exhaustion
         filename = "Pasted_Training_Text.txt"
 
     assessment = mcq_service.generate_mcqs(
@@ -585,7 +627,10 @@ def export_analytics_csv():
     )
 
 @app.get("/api/security/audit-trail")
-def get_security_audit_trail(limit: int = 50):
+def get_security_audit_trail(limit: int = 50, request: Request = None):
+    client_ip = request.client.host if request and request.client else "127.0.0.1"
+    rate_limiter.check_rate_limit("admin_action", client_ip)
+    role = verify_role_access(["ADMIN"], request) if request else "ADMIN"
     return {
         "total_events": len(security_audit_logger.audit_log),
         "events": security_audit_logger.get_audit_trail(limit)

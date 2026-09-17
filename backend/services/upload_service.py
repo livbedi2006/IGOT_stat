@@ -139,10 +139,31 @@ class DocumentUploadService:
         if len(content) == 0:
             raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-        # 4. Generate unique storage ID and SHA-256 hash
+        # 4. Magic Byte & Content Signature Verification (OWASP A04 / CWE-434)
+        if ext == ".pdf" and not content.startswith(b"%PDF-"):
+            raise HTTPException(
+                status_code=400,
+                detail="Security validation failed: File content does not match authentic PDF format signature (%PDF-)."
+            )
+        elif ext in [".docx", ".pptx"] and not content.startswith(b"PK\x03\x04"):
+            raise HTTPException(
+                status_code=400,
+                detail="Security validation failed: File content does not match authentic OpenXML ZIP container signature."
+            )
+        elif ext == ".txt" and b"\x00" in content:
+            raise HTTPException(
+                status_code=400,
+                detail="Security validation failed: Plain text document contains forbidden null bytes."
+            )
+
+        # 5. Generate unique storage ID and SHA-256 hash
         file_hash = hashlib.sha256(content).hexdigest()
         storage_id = f"doc_{uuid.uuid4().hex[:12]}"
-        stored_path = os.path.join(self.storage_dir, f"{storage_id}_{safe_name}")
+        stored_path = os.path.abspath(os.path.join(self.storage_dir, f"{storage_id}_{safe_name}"))
+
+        # Defense-in-depth: Path Traversal boundary check (CWE-22)
+        if not stored_path.startswith(self.storage_dir):
+            raise HTTPException(status_code=400, detail="Security validation failed: Path traversal attempt detected.")
 
         with open(stored_path, "wb") as f:
             f.write(content)
