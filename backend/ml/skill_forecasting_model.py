@@ -70,10 +70,7 @@ class SkillForecastingEngine:
         return X, y
 
     def _train_and_validate(self):
-        """
-        Trains regularized Ridge regression with cross-validation.
-        Evaluates train vs test metrics to verify absence of overfitting.
-        """
+       
         X, y = self._generate_synthetic_historical_data()
 
         # 80/20 train/test split with shuffle
