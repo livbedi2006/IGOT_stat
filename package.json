@@ -1,0 +1,13 @@
+{
+  "name": "statwise",
+  "private": true,
+  "version": "1.0.0",
+  "description": "STATWISE MoSPI AI Learning & Competency Intelligence Platform",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint",
+    "backend": "python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000"
+  }
+}
