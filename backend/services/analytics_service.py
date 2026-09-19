@@ -23,6 +23,7 @@ DEPARTMENTS_DATA = [
     {"department": "Price Statistics Division (PSD)", "officials": 940, "avg_hours": 16.0, "completion_pct": 78, "top_gap": "CPI Elementary Aggregation"},
     {"department": "Economic Statistics Division (ESD)", "officials": 1150, "avg_hours": 21.4, "completion_pct": 71, "top_gap": "IIP Item Replacement"},
     {"department": "Data Informatics & Innovation (DIID)", "officials": 860, "avg_hours": 29.8, "completion_pct": 86, "top_gap": "DPDP Microdata Anonymization"},
+    {"department": "Coordination & Publication Division (CPD)", "officials": 463, "avg_hours": 19.1, "completion_pct": 77, "top_gap": "SDMX Metadata Standards"},
     {"department": "State DES - Sikkim Cell", "officials": 2, "avg_hours": 14.0, "completion_pct": 50, "top_gap": "CAPI Field Operations"}  # Small cohort for testing masking!
 ]
 
