@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, BookOpen, ShieldCheck, Sparkles, ThumbsUp, ThumbsDown, AlertTriangle, Check, Compass, ArrowRight } from "lucide-react";
 import { api } from "../api";
 
-export function TutorView({ currentRole = "JSO", onNavigate }) {
+export function TutorView({ currentRole = "JSO", currentAssignment = "", onNavigate }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState({});
@@ -25,8 +25,14 @@ export function TutorView({ currentRole = "JSO", onNavigate }) {
     }
   ]);
 
+  const defaultAssignment = currentAssignment || localStorage.getItem("statwise_saved_assignment") || "";
+
   const suggestions = [
-    "What ahead in my learning path?",
+    defaultAssignment.toLowerCase().includes("new") || defaultAssignment.toLowerCase().includes("nothing")
+      ? "New to the work: What is my official induction roadmap?"
+      : defaultAssignment.toLowerCase().includes("scrutiny") || defaultAssignment.toLowerCase().includes("srutny")
+      ? "Survey Scrutiny: What automated validation rules should I learn next?"
+      : "What ahead in my learning path?",
     "Explain sampling error in simple language.",
     "Difference between Stratified and Cluster sampling in NSS.",
     "How is CPI compiled with Laspeyres formula?",
@@ -53,7 +59,7 @@ export function TutorView({ currentRole = "JSO", onNavigate }) {
     setLoading(true);
 
     try {
-      const res = await api.askTutor(q, currentRole);
+      const res = await api.askTutor(q, currentRole, defaultAssignment);
       setMessages([...newMsgs, {
         id: res.message_id || `msg_${Date.now()}`,
         sender: "tutor",
@@ -109,10 +115,15 @@ export function TutorView({ currentRole = "JSO", onNavigate }) {
             Retrieval-Augmented Generation (RAG) strictly grounded in approved NSSTA and MoSPI training materials (Prompt O).
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] bg-statwise-navy/10 text-statwise-navy px-3 py-1 rounded-full font-semibold border border-statwise-navy/20">
             Cadre: {roleLabelMap[currentRole] || currentRole}
           </span>
+          {defaultAssignment && (
+            <span className="text-[11px] bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full font-semibold border border-emerald-200">
+              Focus: {defaultAssignment}
+            </span>
+          )}
         </div>
       </div>
 

@@ -66,9 +66,13 @@ export const api = {
   }),
 
   // AI Tutor
-  askTutor: (query, roleContext = "JSO") => request("/api/tutor/chat", {
+  askTutor: (query, roleContext = "JSO", assignmentContext = "") => request("/api/tutor/chat", {
     method: "POST",
-    body: JSON.stringify({ query, role_context: roleContext })
+    body: JSON.stringify({
+      query,
+      role_context: roleContext,
+      assignment_context: assignmentContext || localStorage.getItem("statwise_saved_assignment") || ""
+    })
   }),
   sendTutorFeedback: (messageId, helpful, userComment = "") => request("/api/tutor/feedback", {
     method: "POST",

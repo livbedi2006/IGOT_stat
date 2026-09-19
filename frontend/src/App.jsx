@@ -71,9 +71,9 @@ export function App() {
       localStorage.setItem("statwise_saved_name", name);
       localStorage.setItem("statwise_saved_role", role_code);
       localStorage.setItem("statwise_saved_dept", department);
+      localStorage.setItem("statwise_saved_assignment", current_assignment || "");
 
       setCurrentRole(role_code);
-      await api.switchRole(role_code);
       await api.updateProfile({
         full_name: name,
         name: name,
@@ -144,7 +144,13 @@ export function App() {
               onNavigate={setActiveTab}
             />
           )}
-          {activeTab === "tutor" && <TutorView currentRole={currentRole} onNavigate={setActiveTab} />}
+          {activeTab === "tutor" && (
+            <TutorView
+              currentRole={currentRole}
+              currentAssignment={profileData?.learner?.current_assignment}
+              onNavigate={setActiveTab}
+            />
+          )}
           {activeTab === "analytics" && <AdminAnalyticsView />}
           {activeTab === "virtuallab" && <VirtualLabView />}
           {activeTab === "profile" && (
