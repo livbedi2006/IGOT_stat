@@ -144,7 +144,7 @@ export function App() {
               onNavigate={setActiveTab}
             />
           )}
-          {activeTab === "tutor" && <TutorView />}
+          {activeTab === "tutor" && <TutorView currentRole={currentRole} onNavigate={setActiveTab} />}
           {activeTab === "analytics" && <AdminAnalyticsView />}
           {activeTab === "virtuallab" && <VirtualLabView />}
           {activeTab === "profile" && (

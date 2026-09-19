@@ -54,7 +54,7 @@ KNOWLEDGE_PASSAGES = [
     {
         "id": "kb_fsu_usu",
         "keywords": ["fsu", "usu", "first stage unit", "ultimate stage unit", "census village", "ufs block", "listing", "sampling frame"],
-        "answer": "In NSS multi-stage sampling designs: \n• First Stage Units (FSUs): In the rural sector, FSUs are Census Villages (or panchayat wards in Kerala); in the urban sector, FSUs are Urban Frame Survey (UFS) blocks.\n• Ultimate Stage Units (USUs): USUs are households or operational enterprises drawn after on-ground hamlet-group/sub-block formation and comprehensive household listing.",
+        "answer": "In NSS multi-stage sampling designs:\n- First Stage Units (FSUs): In the rural sector, FSUs are Census Villages (or panchayat wards in Kerala); in the urban sector, FSUs are Urban Frame Survey (UFS) blocks.\n- Ultimate Stage Units (USUs): USUs are households or operational enterprises drawn after on-ground hamlet-group/sub-block formation and comprehensive household listing.",
         "sources": [
             {
                 "title": "NSS Survey Design and Field Operations Manual",
@@ -280,20 +280,20 @@ KNOWLEDGE_PASSAGES = [
         "keywords": ["what ahead", "what next", "what should i do next", "next steps", "learning path", "my roadmap", "career progression", "jso roadmap", "where to start", "how to proceed", "what to learn"],
         "answer": (
             "Here is your official STATWISE Capacity Building Roadmap for the Junior Statistical Officer (JSO) cadre:\n\n"
-            "🎯 4-Stage Progressive Pathway:\n"
+            "4-Stage Progressive Pathway:\n"
             "1. Stage 1: Foundation (Current)\n"
-            "   • Master Survey Design & Sampling Frames (Census villages, UFS blocks, and CAPI operations).\n"
-            "   • Recommended Action: Complete the baseline diagnostic in the 'Assessments' tab to identify your specific competency gaps.\n\n"
+            "   - Master Survey Design & Sampling Frames (Census villages, UFS blocks, and CAPI operations).\n"
+            "   - Recommended Action: Complete the baseline diagnostic in the 'Assessments' tab to identify your specific competency gaps.\n\n"
             "2. Stage 2: Core Analytical Competencies\n"
-            "   • Python for Microdata Wrangling (Pandas/NumPy data cleaning & outlier verification).\n"
-            "   • Sample Estimation & Multiplier Derivation (Horvitz-Thompson formulas & standard errors).\n"
-            "   • Recommended Action: Enrol in 'Python for Government Data Analysis & Automation' (IGOT-STAT-001) via the Recommendations tab.\n\n"
+            "   - Python for Microdata Wrangling (Pandas/NumPy data cleaning & outlier verification).\n"
+            "   - Sample Estimation & Multiplier Derivation (Horvitz-Thompson formulas & standard errors).\n"
+            "   - Recommended Action: Enrol in 'Python for Government Data Analysis & Automation' (IGOT-STAT-001) via the Recommendations tab.\n\n"
             "3. Stage 3: Applied Practice & Simulation\n"
-            "   • Engage with synthetic PLFS and ASI microdata in the 'Virtual Lab (MCP)' to calculate LFPR and WPR.\n"
-            "   • Take proctored practice quizzes to test your exam and field readiness.\n\n"
+            "   - Engage with synthetic PLFS and ASI microdata in the 'Virtual Lab (MCP)' to calculate LFPR and WPR.\n"
+            "   - Take proctored practice quizzes to test your exam and field readiness.\n\n"
             "4. Stage 4: Advanced Governance & Certification\n"
-            "   • Complete the Digital Personal Data Protection (DPDP) Act 2023 compliance certification.\n"
-            "   • Nominate for the NSSTA Residential Induction Training Programme at Greater Noida to qualify for Senior Statistical Officer (SSO) progression."
+            "   - Complete the Digital Personal Data Protection (DPDP) Act 2023 compliance certification.\n"
+            "   - Nominate for the NSSTA Residential Induction Training Programme at Greater Noida to qualify for Senior Statistical Officer (SSO) progression."
         ),
         "sources": [
             {
