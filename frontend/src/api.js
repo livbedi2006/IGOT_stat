@@ -66,9 +66,13 @@ export const api = {
   }),
 
   // AI Tutor
-  askTutor: (query) => request("/api/tutor/chat", {
+  askTutor: (query, roleContext = "JSO") => request("/api/tutor/chat", {
     method: "POST",
-    body: JSON.stringify({ query })
+    body: JSON.stringify({ query, role_context: roleContext })
+  }),
+  sendTutorFeedback: (messageId, helpful, userComment = "") => request("/api/tutor/feedback", {
+    method: "POST",
+    body: JSON.stringify({ message_id: messageId, helpful, user_comment: userComment })
   }),
 
   // Admin & ML Diagnostics
