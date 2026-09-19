@@ -147,7 +147,8 @@ def run_tests():
     # 8. Learning Path 4-Stage Sequencing (Prompt H)
     status, _, data = get("/api/courses/learning-path")
     path = json.loads(data)
-    stages = [p["stage"] for p in path]
+    raw_steps = path.get("steps", path) if isinstance(path, dict) else path
+    stages = [p["stage"] for p in raw_steps]
     record_result(
         "Prompt H: 4-Stage Sequencing (Foundation->Core->Practice->Advanced)",
         stages == ["Foundation", "Core", "Practice", "Advanced"]

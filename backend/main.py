@@ -83,6 +83,7 @@ class FrameTelemetryRequest(BaseModel):
 class TutorChatRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
     role_context: Optional[str] = Field("JSO", max_length=50)
+    assignment_context: Optional[str] = Field(None, max_length=300)
 
 class TutorFeedbackRequest(BaseModel):
     message_id: str = Field(..., max_length=100)
@@ -93,7 +94,9 @@ class SwitchRoleRequest(BaseModel):
     role_code: str = Field(..., min_length=2, max_length=20)  # "JSO", "SSO", "ANALYST", "ISS", "TRAINER"
 
 class OnboardingProfileUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, max_length=150)
     full_name: Optional[str] = Field(None, max_length=150)
+    role_code: Optional[str] = Field(None, max_length=50)
     official_email: Optional[str] = Field(None, max_length=150)
     designation: Optional[str] = Field(None, max_length=150)
     department: Optional[str] = Field(None, max_length=200)
@@ -348,7 +351,8 @@ def get_course_recommendations(filter_tag: str = Query("All")):
         completed_competencies=completed,
         filter_tag=filter_tag,
         target_role=prof["learner"]["role"],
-        department=prof["learner"]["department"]
+        department=prof["learner"]["department"],
+        assignment=prof["learner"].get("current_assignment", "")
     )
     return {
         "filter": filter_tag,
@@ -361,7 +365,8 @@ def get_course_recommendations(filter_tag: str = Query("All")):
 def get_learning_path():
     prof = competency_svc.get_profile()
     completed = prof["learner"]["completed_competencies"]
-    steps = course_catalogue_service.get_learning_path(completed)
+    assignment = prof["learner"].get("current_assignment", "")
+    steps = course_catalogue_service.get_learning_path(completed, assignment=assignment)
     return {
         "path_score": 84,
         "time_left_hours": 11,
@@ -588,7 +593,12 @@ def analyze_proctoring_frame(req: FrameTelemetryRequest):
 def chat_with_tutor(req: TutorChatRequest, request: Request = None):
     client_ip = request.client.host if request and request.client else "127.0.0.1"
     rate_limiter.check_rate_limit("tutor_chat", client_ip)
-    return tutor_service.answer_query(req.query, role_context=req.role_context or "JSO")
+    effective_assignment = req.assignment_context or competency_svc.learner_state.get("current_assignment", "")
+    return tutor_service.answer_query(
+        req.query,
+        role_context=req.role_context or "JSO",
+        assignment_context=effective_assignment
+    )
 
 @app.post("/api/tutor/feedback")
 def submit_tutor_feedback(req: TutorFeedbackRequest):

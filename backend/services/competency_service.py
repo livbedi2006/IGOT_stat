@@ -383,13 +383,19 @@ class CompetencyService:
         """
         Updates learner onboarding profile with server-side validation (Prompt B).
         """
+        has_new_assignment = "current_assignment" in profile_data and profile_data["current_assignment"]
+
+        # Sync role code first if provided, preserving custom assignment
+        if "role_code" in profile_data and profile_data["role_code"] in ROLE_PROFILES:
+            self.set_role(profile_data["role_code"], keep_assignment=bool(has_new_assignment))
+
         allowed_fields = [
             "name", "full_name", "official_email", "designation", "department",
             "current_assignment", "experience_years", "qualification",
             "preferred_language", "previous_training", "career_goal"
         ]
         for field in allowed_fields:
-            if field in profile_data and profile_data[field]:
+            if field in profile_data and profile_data[field] is not None:
                 self.learner_state[field] = profile_data[field]
                 if field == "full_name":
                     self.learner_state["name"] = profile_data[field]
@@ -400,11 +406,89 @@ class CompetencyService:
         self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
         self.learner_state["role"] = self.learner_state.get("role_code", "JSO")
 
-        # Sync role code if designation matches known cadres
-        if "role_code" in profile_data and profile_data["role_code"] in ROLE_PROFILES:
-            self.set_role(profile_data["role_code"])
+        # Dynamically adapt mastery and gap weights based on the learner's assignment and experience
+        self._adapt_competencies_to_assignment()
 
         return self.get_profile()
+
+    def _adapt_competencies_to_assignment(self):
+        """
+        Dynamically adjusts baseline mastery and gap priorities based on what the
+        learner entered in their current assignment / focus area (Prompt B & D).
+        """
+        assignment = str(self.learner_state.get("current_assignment", "")).lower().strip()
+        role_code = self.learner_state.get("role_code", "JSO")
+        base_targets = ROLE_PROFILES.get(role_code, ROLE_PROFILES["JSO"])["target_mastery"]
+
+        # 1. New to work / beginner / nothing / induction
+        new_keywords = ["new to", "new", "nothing", "fresher", "beginner", "none", "entry", "joined", "just join", "started", "na", "no experience"]
+        is_new = any(kw in assignment for kw in new_keywords) or assignment in ["", "none", "nil", "na"]
+
+        # 2. Survey Scrutiny / Field Operations
+        survey_keywords = ["scrutiny", "srutny", "survey", "field", "fod", "inspection", "sampling", "listing", "capi", "sample"]
+        is_survey = any(kw in assignment for kw in survey_keywords)
+
+        # 3. National Accounts / Macro / GDP / GVA
+        na_keywords = ["national accounts", "gdp", "gva", "macro", "nad", "sut", "deflation", "fisim"]
+        is_national_accounts = any(kw in assignment for kw in na_keywords)
+
+        # 4. Price Indices / CPI / WPI
+        price_keywords = ["cpi", "wpi", "price", "inflation", "psd", "laspeyres", "index"]
+        is_price = any(kw in assignment for kw in price_keywords)
+
+        # 5. Industrial Statistics / ASI / IIP
+        industrial_keywords = ["asi", "iip", "industrial", "factories", "factory", "manufacturing", "esd"]
+        is_industrial = any(kw in assignment for kw in industrial_keywords)
+
+        # 6. Data Science / Python / ML
+        ds_keywords = ["python", "data science", "machine learning", "ai", "sql", "coding", "programming", "wrangling"]
+        is_ds = any(kw in assignment for kw in ds_keywords)
+
+        current = dict(self.learner_state.get("current_mastery", {}))
+
+        if is_new and not (is_survey or is_national_accounts or is_industrial or is_price or is_ds):
+            # Novice / Induction baseline: lower current mastery to reflect new joinee status
+            if not self.learner_state.get("experience_years") or self.learner_state.get("experience_years") == 3:
+                self.learner_state["experience_years"] = "Under 1 year (New Joiner)"
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.40, 2)
+            current["survey_design"] = 0.32
+            current["capi_digital_tools"] = 0.38
+            current["python_data_analysis"] = 0.25
+            current["leadership_ethics"] = 0.50
+        elif is_survey and not (is_national_accounts or is_industrial or is_price):
+            # Active field & survey scrutiny experience
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.65, 2)
+            current["survey_design"] = 0.78       # Strong in survey design & scrutiny!
+            current["capi_digital_tools"] = 0.82   # Strong in CAPI
+            current["python_data_analysis"] = 0.36 # High gap! Needs automated scripting
+            current["survey_sampling"] = 0.52     # Needs multipliers
+            current["data_privacy_dpdp"] = 0.55   # Needs DPDP microdata protections
+        elif is_national_accounts:
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.60, 2)
+            current["national_accounts"] = 0.50   # High focus gap
+            current["price_indices"] = 0.54       # Deflators
+            current["survey_design"] = 0.60
+        elif is_price:
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.60, 2)
+            current["price_indices"] = 0.50
+            current["survey_design"] = 0.58
+        elif is_industrial:
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.60, 2)
+            current["industrial_stats"] = 0.48
+            current["survey_design"] = 0.60
+        elif is_ds:
+            for k in COMPETENCY_REGISTRY:
+                current[k] = round(base_targets.get(k, 0.7) * 0.60, 2)
+            current["python_data_analysis"] = 0.78
+            current["sql_databases"] = 0.75
+            current["survey_design"] = 0.50
+
+        self.learner_state["current_mastery"] = current
 
     def get_profile(self) -> Dict[str, Any]:
         role_code = self.learner_state["role_code"]
@@ -443,12 +527,66 @@ class CompetencyService:
             # 2. Role Criticality (Normalized 0-1 from 1-5 scale)
             norm_crit = v["role_criticality"] / 5.0
 
-            # 3. Assignment Relevance (1.0 if keywords match current assignment, else 0.4)
+            # 3. Assignment Relevance with Semantic Matching & Custom Reason Generation
             comp_name_lower = v["name"].lower()
-            is_relevant_to_assignment = any(
-                token in assignment_text for token in comp_name_lower.split() if len(token) > 3
-            )
-            assign_rel = 1.0 if is_relevant_to_assignment else 0.4
+            assignment_lower = assignment_text.lower().strip()
+
+            is_rel = False
+            custom_reason = None
+
+            is_new = any(kw in assignment_lower for kw in ["new to", "new", "nothing", "fresher", "beginner", "none", "entry"]) or assignment_lower in ["", "none", "na", "nil"]
+            is_survey = any(kw in assignment_lower for kw in ["scrutiny", "srutny", "survey", "field", "fod", "inspection", "sampling", "listing", "capi"])
+            is_na = any(kw in assignment_lower for kw in ["national accounts", "gdp", "gva", "macro", "nad", "sut", "deflation"])
+            is_price = any(kw in assignment_lower for kw in ["cpi", "wpi", "price", "inflation", "psd", "laspeyres"])
+            is_ind = any(kw in assignment_lower for kw in ["asi", "iip", "industrial", "factories", "factory", "manufacturing", "esd"])
+            is_ds = any(kw in assignment_lower for kw in ["python", "data science", "machine learning", "ai", "sql", "coding"])
+
+            if is_new and not (is_survey or is_na or is_price or is_ind or is_ds):
+                if k in ["survey_design", "capi_digital_tools", "survey_sampling", "python_data_analysis", "price_indices"]:
+                    is_rel = True
+                    custom_reason = "Essential foundational onboarding competency for officers new to MoSPI statistical operations."
+            elif is_survey and not (is_na or is_price or is_ind):
+                if k == "python_data_analysis":
+                    is_rel = True
+                    custom_reason = "Directly accelerates your survey scrutiny focus by automating validation rules, outlier detection, and report generation."
+                elif k == "survey_sampling":
+                    is_rel = True
+                    custom_reason = "Directly enhances your survey scrutiny competency with Horvitz-Thompson multipliers and standard error estimation."
+                elif k == "data_privacy_dpdp":
+                    is_rel = True
+                    custom_reason = "Critical statutory requirement for handling and de-identifying raw survey scrutiny microdata."
+                elif k in ["sql_databases", "survey_design"]:
+                    is_rel = True
+                    custom_reason = "High-priority analytical capability for managing and querying large-scale survey scrutiny datasets."
+            elif is_na:
+                if k == "national_accounts":
+                    is_rel = True
+                    custom_reason = "Directly applies to your focus area in National Accounts and GDP/GVA compilation."
+                elif k == "price_indices":
+                    is_rel = True
+                    custom_reason = "Essential price deflator methodology required for constant-price GDP compilation."
+            elif is_price:
+                if k == "price_indices":
+                    is_rel = True
+                    custom_reason = "Directly applies to your focus area in Price Indices compilation and inflation tracking."
+                elif k == "national_accounts":
+                    is_rel = True
+                    custom_reason = "Key macroeconomic domain utilizing consumer and wholesale price deflators."
+            elif is_ind:
+                if k == "industrial_stats":
+                    is_rel = True
+                    custom_reason = "Directly applies to your focus area in Annual Survey of Industries (ASI) and IIP compilation."
+                elif k == "survey_sampling":
+                    is_rel = True
+                    custom_reason = "Required for ASI sample sector estimation and multiplier derivation."
+            elif is_ds:
+                if k in ["ai_ml_stats", "python_data_analysis", "sql_databases"]:
+                    is_rel = True
+                    custom_reason = "Directly applies to your technical analytics and automated data science focus."
+            else:
+                is_rel = any(token in assignment_lower for token in comp_name_lower.split() if len(token) > 3)
+
+            assign_rel = 1.0 if is_rel else 0.4
 
             # 4. Prerequisite Urgency (1.0 if this competency unblocks downstream courses, else 0.5)
             has_unblocked_dependents = any(
@@ -484,7 +622,7 @@ class CompetencyService:
                 "is_urgent": is_urgent,
                 "description": v["description"],
                 "evidence": evidence,
-                "learner_reason": f"Required for {v['role_criticality']}/5 criticality in {self.learner_state['designation']} role."
+                "learner_reason": custom_reason if custom_reason else f"Required for {v['role_criticality']}/5 criticality in {self.learner_state['designation']} role."
             })
 
         # Sort gaps by weighted priority score descending
@@ -503,12 +641,14 @@ class CompetencyService:
                 "target": int(round(role_target.get(rk, 0.8) * 100))
             })
 
+        readiness_status = "On Track" if readiness_pct >= 65 else ("Needs Induction / Foundation Building" if readiness_pct < 50 else "Needs Attention")
+
         return {
             "learner": self.learner_state,
             "overall_readiness": {
                 "current_readiness": int(readiness_pct),
                 "target_readiness": 85,
-                "status": "On Track" if readiness_pct >= 65 else "Needs Attention"
+                "status": readiness_status
             },
             "kpis": {
                 "overall_readiness": int(readiness_pct),
@@ -552,14 +692,15 @@ class CompetencyService:
         self.learner_state["learning_hours"] = round(self.learner_state["learning_hours"] + hours_added, 1)
         return self.get_profile()
 
-    def set_role(self, role_code: str):
+    def set_role(self, role_code: str, keep_assignment: bool = False):
         if role_code in ROLE_PROFILES:
             prof = ROLE_PROFILES[role_code]
             self.learner_state["role_code"] = role_code
             self.learner_state["role"] = role_code
             self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
             self.learner_state["designation"] = prof["title"]
-            self.learner_state["department"] = prof["department"]
-            self.learner_state["experience_years"] = prof.get("typical_experience", "5 years")
-            self.learner_state["current_assignment"] = prof.get("default_assignment", "Statistical Work")
+            if not keep_assignment:
+                self.learner_state["department"] = prof["department"]
+                self.learner_state["current_assignment"] = prof.get("default_assignment", "Statistical Work")
+            self._adapt_competencies_to_assignment()
         return self.get_profile()
