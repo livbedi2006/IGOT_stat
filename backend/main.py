@@ -360,7 +360,12 @@ def get_course_recommendations(filter_tag: str = Query("All")):
 def get_learning_path():
     prof = competency_svc.get_profile()
     completed = prof["learner"]["completed_competencies"]
-    return course_catalogue_service.get_learning_path(completed)
+    steps = course_catalogue_service.get_learning_path(completed)
+    return {
+        "path_score": 84,
+        "time_left_hours": 11,
+        "steps": steps
+    }
 
 
 # --- Document Upload Endpoints (Prompt J) ---
