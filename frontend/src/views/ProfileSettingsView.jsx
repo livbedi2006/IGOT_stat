@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { User, Shield, CheckCircle2, Lock, Languages, Bell, Eye, Edit3, Save, AlertCircle } from "lucide-react";
+import { CheckCircle2, Edit3, Save } from "lucide-react";
+import { api } from "../api";
 
 export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
   const [toggles, setToggles] = useState({
@@ -78,12 +79,7 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
+      await api.updateProfile(formData);
       setSaveStatus("Profile updated and synced with MoSPI competency ledger successfully!");
       setIsEditing(false);
     } catch (err) {

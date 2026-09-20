@@ -21,37 +21,71 @@ import time
 BASE_URL = "http://127.0.0.1:8000"
 
 
-def make_request(path: str, method: str = "GET", data: bytes = None, headers: dict = None):
-    req = urllib.request.Request(
-        f"{BASE_URL}{path}",
-        data=data,
-        headers=headers or {},
-        method=method
-    )
+import socket
+
+def _is_server_up():
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return resp.status, dict(resp.headers), resp.read().decode("utf-8", errors="ignore")
-    except urllib.error.HTTPError as e:
-        return e.code, dict(e.headers), e.read().decode("utf-8", errors="ignore")
-    except Exception as ex:
-        return 0, {}, str(ex)
+        with socket.create_connection(("127.0.0.1", 8000), timeout=0.1):
+            return True
+    except Exception:
+        return False
+
+_SERVER_UP = _is_server_up()
+_test_client = None
+
+def _get_test_client():
+    global _test_client
+    if _test_client is None:
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from fastapi.testclient import TestClient
+        from main import app
+        _test_client = TestClient(app)
+    return _test_client
+
+
+def make_request(path: str, method: str = "GET", data: bytes = None, headers: dict = None):
+    if _SERVER_UP:
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=data,
+            headers=headers or {},
+            method=method
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status, dict(resp.headers), resp.read().decode("utf-8", errors="ignore")
+        except urllib.error.HTTPError as e:
+            return e.code, dict(e.headers), e.read().decode("utf-8", errors="ignore")
+        except Exception:
+            pass
+
+    client = _get_test_client()
+    r = client.request(method=method, url=path, content=data, headers=headers)
+    return r.status_code, dict(r.headers), r.text
 
 
 def post_multipart(path: str, filename: str, content: bytes, content_type: str = "application/pdf"):
-    boundary = "----WebKitFormBoundarySecurityAudit7MA4YWxkTrZu0gW"
-    body = io.BytesIO()
-    body.write(f"--{boundary}\r\n".encode("utf-8"))
-    body.write(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"))
-    body.write(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
-    body.write(content)
-    body.write(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+    if _SERVER_UP:
+        boundary = "----WebKitFormBoundarySecurityAudit7MA4YWxkTrZu0gW"
+        body = io.BytesIO()
+        body.write(f"--{boundary}\r\n".encode("utf-8"))
+        body.write(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"))
+        body.write(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
+        body.write(content)
+        body.write(f"\r\n--{boundary}--\r\n".encode("utf-8"))
 
-    return make_request(
-        path=path,
-        method="POST",
-        data=body.getvalue(),
-        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
-    )
+        return make_request(
+            path=path,
+            method="POST",
+            data=body.getvalue(),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        )
+
+    client = _get_test_client()
+    r = client.post(path, files={"file": (filename, content, content_type)})
+    return r.status_code, dict(r.headers), r.text
 
 
 def run_security_audit():
@@ -174,6 +208,10 @@ def run_security_audit():
     print(f"  Security Audit Results: {passed} PASSED, {failed} FAILED (Total {passed + failed})")
     print("================================================================================")
     return failed == 0
+
+
+def test_security_audit_suite():
+    assert run_security_audit() is True
 
 
 if __name__ == "__main__":

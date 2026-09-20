@@ -42,6 +42,18 @@ export const api = {
 
   // Assessments & Quizzes
   getActiveQuiz: (quizId) => request(quizId ? `/api/mcq/active-quiz?quiz_id=${quizId}` : "/api/mcq/active-quiz"),
+  getQuestions: () => request("/api/mcq/questions"),
+  approveQuestion: (questionId, trainerId = "trainer_dr_sunita") => request(`/api/mcq/questions/${questionId}/approve`, {
+    method: "POST",
+    body: JSON.stringify({ trainer_id: trainerId })
+  }),
+  rejectQuestion: (questionId, reason = "Rejected by trainer review", trainerId = "trainer_dr_sunita") => request(`/api/mcq/questions/${questionId}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ reason, trainer_id: trainerId })
+  }),
+  regenerateQuestion: (questionId) => request(`/api/mcq/questions/${questionId}/regenerate`, {
+    method: "POST"
+  }),
   submitQuiz: (payload) => request("/api/quiz/submit", {
     method: "POST",
     body: JSON.stringify(payload)
@@ -58,6 +70,7 @@ export const api = {
     method: "POST",
     body: JSON.stringify({ assessment_id: assessmentId, format })
   }),
+  getExportCsvUrl: () => `${API_BASE_URL}/api/analytics/export-csv`,
 
   // AI Proctoring
   sendProctoringTelemetry: (telemetry) => request("/api/proctoring/analyze-frame", {

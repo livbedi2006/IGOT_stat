@@ -201,7 +201,7 @@ def switch_user_role(req: SwitchRoleRequest, request: Request):
 @app.put("/api/auth/profile")
 def update_learner_profile(req: OnboardingProfileUpdateRequest, request: Request):
     client_ip = request.client.host if request.client else "127.0.0.1"
-    updates = req.dict(exclude_unset=True)
+    updates = req.model_dump(exclude_unset=True) if hasattr(req, "model_dump") else req.dict(exclude_unset=True)
     updated = competency_svc.update_onboarding_profile(updates)
     user_id = updated["learner"].get("id") or updated["learner"].get("user_id") or "usr_officer_default"
     user_role = updated["learner"].get("role") or updated["learner"].get("role_code") or "JSO"
@@ -294,7 +294,7 @@ def create_nssta_programme(req: CreateProgrammeRequest, request: Request = None)
     client_ip = request.client.host if request and request.client else "127.0.0.1"
     rate_limiter.check_rate_limit("admin_action", client_ip)
     role = verify_role_access(["ADMIN", "TRAINER"], request) if request else "ADMIN"
-    data = req.dict()
+    data = req.model_dump() if hasattr(req, "model_dump") else req.dict()
     created = nssta_programme_service.create_programme(data)
     security_audit_logger.log_event(
         event_type="ADMIN_CREATE",
@@ -491,7 +491,8 @@ def regenerate_question(question_id: str):
 
 @app.put("/api/mcq/questions/{question_id}")
 def update_question(question_id: str, req: UpdateMCQRequest):
-    return mcq_service.update_question(question_id, req.dict(exclude_unset=True))
+    data = req.model_dump(exclude_unset=True) if hasattr(req, "model_dump") else req.dict(exclude_unset=True)
+    return mcq_service.update_question(question_id, data)
 
 @app.post("/api/mcq/create-quiz")
 def create_quiz_from_approved_questions(req: CreateQuizRequest):

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UploadCloud, FileText, CheckCircle2, Download, Send, Sparkles, BookOpen, AlertCircle, ShieldAlert, Check, X, RefreshCw, Layers } from "lucide-react";
+import { UploadCloud, FileText, CheckCircle2, Download, Send, Sparkles, AlertCircle, Check, X, RefreshCw } from "lucide-react";
 import { api } from "../api";
 
 export function AssessmentsView({ onPublishQuiz, onNavigate }) {
@@ -13,22 +13,21 @@ export function AssessmentsView({ onPublishQuiz, onNavigate }) {
   const [rejectModalId, setRejectModalId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
 
+  const loadQuestions = async () => {
+    try {
+      const data = await api.getQuestions();
+      if (Array.isArray(data) && data.length > 0) {
+        setQuestions(data.slice(0, 10)); // Show top 10 items
+      }
+    } catch (err) {
+      console.warn("Using local questions state:", err);
+    }
+  };
+
   useEffect(() => {
     // Load existing question bank on mount
     loadQuestions();
   }, []);
-
-  const loadQuestions = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/mcq/questions");
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setQuestions(data.slice(0, 10)); // Show top 10 items
-      }
-    } catch (e) {
-      console.warn("Using local questions state:", e);
-    }
-  };
 
   const handleGenerate = async (presetText = null, presetName = null) => {
     setIsGenerating(true);
@@ -66,13 +65,8 @@ export function AssessmentsView({ onPublishQuiz, onNavigate }) {
 
   const handleApprove = async (questionId) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/mcq/questions/${questionId}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trainer_id: "trainer_dr_sunita" })
-      });
-      const data = await res.json();
-      if (data.status === "SUCCESS") {
+      const data = await api.approveQuestion(questionId, "trainer_dr_sunita");
+      if (data?.status === "SUCCESS") {
         setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, status: "Approved" } : q));
       }
     } catch (e) {
@@ -83,11 +77,7 @@ export function AssessmentsView({ onPublishQuiz, onNavigate }) {
   const handleReject = async (questionId) => {
     if (!rejectReason) return;
     try {
-      await fetch(`http://localhost:8000/api/mcq/questions/${questionId}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: rejectReason, trainer_id: "trainer_dr_sunita" })
-      });
+      await api.rejectQuestion(questionId, rejectReason, "trainer_dr_sunita");
       setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, status: "Rejected", rejection_reason: rejectReason } : q));
       setRejectModalId(null);
       setRejectReason("");
@@ -99,9 +89,8 @@ export function AssessmentsView({ onPublishQuiz, onNavigate }) {
 
   const handleRegenerate = async (questionId) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/mcq/questions/${questionId}/regenerate`, { method: "POST" });
-      const data = await res.json();
-      if (data.question) {
+      const data = await api.regenerateQuestion(questionId);
+      if (data?.question) {
         setQuestions(prev => prev.map(q => q.id === questionId ? data.question : q));
       }
     } catch (e) {
@@ -129,7 +118,8 @@ export function AssessmentsView({ onPublishQuiz, onNavigate }) {
   const handleExport = async (format) => {
     try {
       const quizId = assessment?.id || "quiz_survey_sampling_101";
-      const res = await fetch(`http://localhost:8000/api/mcq/export`, {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${baseUrl}/api/mcq/export`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assessment_id: quizId, format })

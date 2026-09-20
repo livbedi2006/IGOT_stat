@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, XCircle, Shield, Camera, Eye, AlertTriangle, ArrowRight, RotateCcw, Award } from "lucide-react";
+import { Camera, Eye, ArrowRight, RotateCcw, Award } from "lucide-react";
 import confetti from "canvas-confetti";
 import { api } from "../api";
 

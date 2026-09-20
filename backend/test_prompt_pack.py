@@ -8,53 +8,111 @@ import urllib.parse
 import urllib.error
 import json
 import io
+import socket
 
 BASE_URL = "http://127.0.0.1:8000"
 
+def _is_server_up():
+    try:
+        with socket.create_connection(("127.0.0.1", 8000), timeout=0.1):
+            return True
+    except Exception:
+        return False
+
+_SERVER_UP = _is_server_up()
+_test_client = None
+
+def _get_test_client():
+    global _test_client
+    if _test_client is None:
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from fastapi.testclient import TestClient
+        from main import app
+        _test_client = TestClient(app)
+    return _test_client
+
 def get(path: str):
-    req = urllib.request.Request(f"{BASE_URL}{path}")
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return resp.status, resp.headers, resp.read().decode("utf-8")
+    if _SERVER_UP:
+        req = urllib.request.Request(f"{BASE_URL}{path}")
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status, resp.headers, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read().decode("utf-8")
+        except Exception:
+            pass
+    client = _get_test_client()
+    r = client.get(path)
+    return r.status_code, r.headers, r.text
 
 def post_json(path: str, data: dict):
-    payload = json.dumps(data).encode("utf-8")
-    req = urllib.request.Request(
-        f"{BASE_URL}{path}",
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return resp.status, resp.headers, resp.read().decode("utf-8")
+    if _SERVER_UP:
+        payload = json.dumps(data).encode("utf-8")
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status, resp.headers, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read().decode("utf-8")
+        except Exception:
+            pass
+    client = _get_test_client()
+    r = client.post(path, json=data)
+    return r.status_code, r.headers, r.text
 
 def put_json(path: str, data: dict):
-    payload = json.dumps(data).encode("utf-8")
-    req = urllib.request.Request(
-        f"{BASE_URL}{path}",
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="PUT"
-    )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return resp.status, resp.headers, resp.read().decode("utf-8")
+    if _SERVER_UP:
+        payload = json.dumps(data).encode("utf-8")
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="PUT"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status, resp.headers, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read().decode("utf-8")
+        except Exception:
+            pass
+    client = _get_test_client()
+    r = client.put(path, json=data)
+    return r.status_code, r.headers, r.text
 
 def post_multipart(path: str, filename: str, content: bytes, content_type: str):
-    boundary = "----WebKitFormBoundaryStatwise7MA4YWxkTrZu0gW"
-    body = io.BytesIO()
-    body.write(f"--{boundary}\r\n".encode("utf-8"))
-    body.write(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"))
-    body.write(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
-    body.write(content)
-    body.write(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+    if _SERVER_UP:
+        boundary = "----WebKitFormBoundaryStatwise7MA4YWxkTrZu0gW"
+        body = io.BytesIO()
+        body.write(f"--{boundary}\r\n".encode("utf-8"))
+        body.write(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode("utf-8"))
+        body.write(f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"))
+        body.write(content)
+        body.write(f"\r\n--{boundary}--\r\n".encode("utf-8"))
 
-    req = urllib.request.Request(
-        f"{BASE_URL}{path}",
-        data=body.getvalue(),
-        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
-        method="POST"
-    )
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return resp.status, resp.headers, resp.read().decode("utf-8")
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=body.getvalue(),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return resp.status, resp.headers, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.headers, e.read().decode("utf-8")
+        except Exception:
+            pass
+    client = _get_test_client()
+    r = client.post(path, files={"file": (filename, content, content_type)})
+    return r.status_code, r.headers, r.text
 
 
 def run_tests():
@@ -319,6 +377,9 @@ def run_tests():
     print(f"  Test Suite Completed: {passed} PASSED, {failed} FAILED (Total {passed + failed})")
     print("================================================================================")
     return failed == 0
+
+def test_prompt_pack_suite():
+    assert run_tests() is True
 
 if __name__ == "__main__":
     import sys

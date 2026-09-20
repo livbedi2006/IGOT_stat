@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, TrendingUp, CheckCircle2, Award, Download, Cpu, ShieldCheck, Building2, BarChart2, AlertCircle, ShieldAlert } from "lucide-react";
+import { Users, TrendingUp, CheckCircle2, Award, Download, Cpu, ShieldCheck, AlertCircle } from "lucide-react";
 import { MLDiagnosticsModal } from "../components/MLDiagnosticsModal";
 import { api } from "../api";
 
@@ -7,8 +7,7 @@ export function AdminAnalyticsView() {
   const [orgData, setOrgData] = useState(null);
   const [diagnostics, setDiagnostics] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [selectedDeptFilter, setSelectedDeptFilter] = useState("All");
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
@@ -53,7 +52,7 @@ export function AdminAnalyticsView() {
   ];
 
   const handleExportCSV = () => {
-    window.location.href = "http://localhost:8000/api/analytics/export-csv";
+    window.location.href = api.getExportCsvUrl();
   };
 
   return (
