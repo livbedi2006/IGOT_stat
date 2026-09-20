@@ -7,8 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI, UploadFile, File, Form, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse, PlainTextResponse
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional, List, Dict, Any, Union
 
 from ml.skill_forecasting_model import SkillForecastingEngine
 from ml.blooms_classifier import BloomsTaxonomyClassifier
@@ -101,11 +101,23 @@ class OnboardingProfileUpdateRequest(BaseModel):
     designation: Optional[str] = Field(None, max_length=150)
     department: Optional[str] = Field(None, max_length=200)
     current_assignment: Optional[str] = Field(None, max_length=300)
-    experience_years: Optional[float] = Field(None, ge=0.0, le=50.0)
+    experience_years: Optional[Union[float, int, str]] = None
     qualification: Optional[str] = Field(None, max_length=150)
     preferred_language: Optional[str] = Field(None, max_length=100)
     previous_training: Optional[str] = Field(None, max_length=300)
     career_goal: Optional[str] = Field(None, max_length=300)
+
+    @field_validator("experience_years", mode="before")
+    @classmethod
+    def parse_experience(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, (int, float)):
+            return float(v)
+        try:
+            return float(str(v).strip())
+        except (ValueError, TypeError):
+            return 1.0
 
 class QuizSubmissionRequest(BaseModel):
     assessment_id: str = Field(..., max_length=100)
@@ -366,11 +378,37 @@ def get_learning_path():
     prof = competency_svc.get_profile()
     completed = prof["learner"]["completed_competencies"]
     assignment = prof["learner"].get("current_assignment", "")
-    steps = course_catalogue_service.get_learning_path(completed, assignment=assignment)
+    target_role = prof["learner"].get("role") or prof["learner"].get("role_code") or "JSO"
+    gaps_dict = {g["id"]: g["gap_ratio"] for g in prof.get("all_gaps", [])}
+
+    steps = course_catalogue_service.get_learning_path(
+        completed_competencies=completed,
+        assignment=assignment,
+        gaps_dict=gaps_dict,
+        target_role=target_role
+    )
+
+    # Dynamic path score based on learner readiness and path progression
+    readiness = prof.get("readiness_percentage", 68.0)
+    completed_steps = sum(1 for s in steps if s.get("status") == "Completed")
+    total_steps = max(len(steps), 1)
+    completion_ratio = completed_steps / total_steps
+    path_score = int(round(min(100, readiness * 0.6 + completion_ratio * 40 + 20)))
+
+    # Compute actual time left (hours)
+    remaining_hours = 0
+    for s in steps:
+        if s.get("status") != "Completed":
+            remaining_hours += int(round(s.get("duration_hours", 3.0)))
+    time_left = max(remaining_hours, 2)
+
     return {
-        "path_score": 84,
-        "time_left_hours": 11,
-        "steps": steps
+        "path_score": path_score,
+        "time_left_hours": time_left,
+        "steps": steps,
+        "target_role": target_role,
+        "total_steps": len(steps),
+        "completed_count": completed_steps
     }
 
 

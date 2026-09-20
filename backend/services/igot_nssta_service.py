@@ -303,21 +303,51 @@ class CourseCatalogueService:
         stages = ["Foundation", "Core", "Practice", "Advanced"]
         sequenced_path = []
 
+        step_counter = 1
+        found_active = False
+
         for stage_name in stages:
             stage_items = [r for r in all_recs if r["stage"] == stage_name]
             if stage_items:
                 best_item = stage_items[0]
                 is_completed = best_item["competency_key"] in completed_competencies
+
+                if is_completed:
+                    status = "Completed"
+                elif not found_active:
+                    status = "In progress"
+                    found_active = True
+                elif step_counter == 2 or (sequenced_path and sequenced_path[-1]["status"] == "In progress"):
+                    status = "Next"
+                else:
+                    status = "Upcoming"
+
+                # Infer action type
+                comp_key = best_item.get("competency_key", "")
+                item_type = best_item.get("type", "Course")
+                if "lab" in item_type.lower() or "python" in comp_key or "sql" in comp_key:
+                    action_type = "virtuallab"
+                elif "programme" in item_type.lower() or "tpac" in best_item["provider"].lower():
+                    action_type = "programme"
+                else:
+                    action_type = "quiz"
+
                 sequenced_path.append({
+                    "step_number": step_counter,
                     "stage": stage_name,
                     "title": best_item["title"],
                     "provider": best_item["provider"],
-                    "competency_key": best_item["competency_key"],
+                    "type": item_type,
+                    "competency_key": comp_key,
                     "duration": best_item["duration_label"],
-                    "status": "Completed" if is_completed else ("In Progress" if stage_name in ["Foundation", "Core"] else "Upcoming"),
+                    "duration_hours": best_item.get("duration_hours", 4.0),
+                    "status": status,
+                    "action_type": action_type,
                     "course_id": best_item["id"],
-                    "why_recommended": best_item["why_recommended"]
+                    "why_recommended": best_item["why_recommended"],
+                    "url": best_item.get("url", "https://nssta.gov.in")
                 })
+                step_counter += 1
 
         return sequenced_path
 

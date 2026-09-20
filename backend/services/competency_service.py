@@ -396,11 +396,17 @@ class CompetencyService:
         ]
         for field in allowed_fields:
             if field in profile_data and profile_data[field] is not None:
-                self.learner_state[field] = profile_data[field]
+                val = profile_data[field]
+                if field == "experience_years":
+                    try:
+                        val = float(val)
+                    except (ValueError, TypeError):
+                        val = 1.0
+                self.learner_state[field] = val
                 if field == "full_name":
-                    self.learner_state["name"] = profile_data[field]
+                    self.learner_state["name"] = val
                 elif field == "name":
-                    self.learner_state["full_name"] = profile_data[field]
+                    self.learner_state["full_name"] = val
 
         # Keep id and role aliases synced
         self.learner_state["id"] = self.learner_state.get("user_id", "usr_officer_default")
@@ -449,7 +455,8 @@ class CompetencyService:
         if is_new and not (is_survey or is_national_accounts or is_industrial or is_price or is_ds):
             # Novice / Induction baseline: lower current mastery to reflect new joinee status
             if not self.learner_state.get("experience_years") or self.learner_state.get("experience_years") == 3:
-                self.learner_state["experience_years"] = "Under 1 year (New Joiner)"
+                self.learner_state["experience_years"] = 0.5
+                self.learner_state["experience_label"] = "Under 1 year (New Joiner)"
             for k in COMPETENCY_REGISTRY:
                 current[k] = round(base_targets.get(k, 0.7) * 0.40, 2)
             current["survey_design"] = 0.32

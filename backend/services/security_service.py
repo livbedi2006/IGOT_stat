@@ -52,7 +52,7 @@ class RateLimiter:
             "login": (10, 60),          # 10 requests per minute
             "upload": (15, 60),         # 15 uploads per minute
             "mcq_generate": (12, 60),   # 12 generations per minute
-            "tutor_chat": (30, 60),     # 30 chat messages per minute
+            "tutor_chat": (60, 60),     # 60 chat messages per minute
             "admin_action": (20, 60),   # 20 admin operations per minute
             "default": (120, 60)        # 120 standard requests per minute
         }
