@@ -12,10 +12,27 @@ export function UserIdentificationModal({ isOpen, onClose, onIdentify, initialPr
     initialProfile?.department || localStorage.getItem("statwise_saved_dept") || "Data Informatics & Innovation Division (DIID)"
   );
   const [assignment, setAssignment] = useState(
-    initialProfile?.current_assignment || "Official Statistical Analysis & Data Scrutiny"
+    initialProfile?.current_assignment || localStorage.getItem("statwise_saved_assignment") || "Official Statistical Analysis & Data Scrutiny"
   );
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialProfile?.name || localStorage.getItem("statwise_saved_name")) {
+        setName(initialProfile?.name || localStorage.getItem("statwise_saved_name") || "");
+      }
+      if (initialProfile?.role_code || localStorage.getItem("statwise_saved_role")) {
+        setRole(initialProfile?.role_code || localStorage.getItem("statwise_saved_role") || "JSO");
+      }
+      if (initialProfile?.department || localStorage.getItem("statwise_saved_dept")) {
+        setDepartment(initialProfile?.department || localStorage.getItem("statwise_saved_dept") || "Data Informatics & Innovation Division (DIID)");
+      }
+      if (initialProfile?.current_assignment || localStorage.getItem("statwise_saved_assignment")) {
+        setAssignment(initialProfile?.current_assignment || localStorage.getItem("statwise_saved_assignment") || "Official Statistical Analysis & Data Scrutiny");
+      }
+    }
+  }, [isOpen, initialProfile]);
 
   if (!isOpen) return null;
 

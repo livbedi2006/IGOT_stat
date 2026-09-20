@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CheckCircle2, Edit3, Save } from "lucide-react";
 import { api } from "../api";
 
-export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
+export function ProfileSettingsView({ learner, currentRole, onRoleChange, onProfileUpdated }) {
   const [toggles, setToggles] = useState({
     rbac: true,
     historySync: true,
@@ -13,12 +13,12 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: learner?.name || "Statistical Officer",
+    full_name: learner?.name || learner?.full_name || "Statistical Officer",
     official_email: learner?.official_email || "officer@mospi.gov.in",
     designation: learner?.designation || "Junior Statistical Officer",
     department: learner?.department || "Data Informatics & Innovation Division (DIID)",
     current_assignment: learner?.current_assignment || "PLFS Microdata Scrutiny & Automated Tabulation",
-    experience_years: learner?.experience_years || 3,
+    experience_years: typeof learner?.experience_years === "number" ? learner.experience_years : (Number(learner?.experience_years) || 3),
     qualification: learner?.qualification || "M.Sc. Statistics",
     preferred_language: learner?.preferred_language || "English / Hindi",
     previous_training: learner?.previous_training || "Foundation Course on Official Statistics (NSSTA 2023)",
@@ -29,11 +29,16 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
     if (learner && !isEditing) {
       setFormData(prev => ({
         ...prev,
-        full_name: learner.name || prev.full_name,
+        full_name: learner.name || learner.full_name || prev.full_name,
         official_email: learner.official_email || prev.official_email,
         designation: learner.designation || prev.designation,
         department: learner.department || prev.department,
-        current_assignment: learner.current_assignment || prev.current_assignment
+        current_assignment: learner.current_assignment || prev.current_assignment,
+        experience_years: typeof learner.experience_years === "number" ? learner.experience_years : (Number(learner.experience_years) || prev.experience_years),
+        qualification: learner.qualification || prev.qualification,
+        preferred_language: learner.preferred_language || prev.preferred_language,
+        previous_training: learner.previous_training || prev.previous_training,
+        career_goal: learner.career_goal || prev.career_goal
       }));
     }
   }, [learner, isEditing]);
@@ -78,14 +83,25 @@ export function ProfileSettingsView({ learner, currentRole, onRoleChange }) {
       return;
     }
 
+    const payload = {
+      ...formData,
+      experience_years: Number(formData.experience_years) || 1
+    };
+
     try {
-      await api.updateProfile(formData);
+      await api.updateProfile(payload);
       setSaveStatus("Profile updated and synced with MoSPI competency ledger successfully!");
       setIsEditing(false);
+      if (onProfileUpdated) {
+        await onProfileUpdated();
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Profile update error:", err);
       setSaveStatus("Profile updated locally.");
       setIsEditing(false);
+      if (onProfileUpdated) {
+        await onProfileUpdated();
+      }
     } finally {
       setIsSaving(false);
     }

@@ -34,10 +34,13 @@ export function TutorView({ currentRole = "JSO", currentAssignment = "", onNavig
       ? "Survey Scrutiny: What automated validation rules should I learn next?"
       : "What ahead in my learning path?",
     "Explain sampling error in simple language.",
+    "What is CAPI digital data collection in MoSPI?",
+    "What are my priority competency gaps?",
     "Difference between Stratified and Cluster sampling in NSS.",
     "How is CPI compiled with Laspeyres formula?",
     "Define Gross Value Added (GVA) at basic prices.",
     "DPDP Act 2023 obligations for statistical microdata.",
+    "What is SDMX metadata standard?",
     "Tell me about Martian rocket exploration." // Tests strict Prompt O uncertainty fallback
   ];
 
@@ -70,13 +73,27 @@ export function TutorView({ currentRole = "JSO", currentAssignment = "", onNavig
       }]);
     } catch (err) {
       console.error("AI Tutor query error:", err);
+      const isRateLimited = err?.message?.includes("429");
+      const isServerDown = err?.message?.includes("503") || err?.message?.includes("Failed to fetch");
+
+      let errorMsg = "This query cannot be verified from approved MoSPI/NSSTA learning materials. To maintain statistical fidelity, the AI Tutor only provides source-backed answers. Please consult an official NSSTA reference document or contact a designated cadre trainer.";
+      let sources = [
+        { title: "National Statistical Systems Training Academy (NSSTA) Reference Catalogue", page: "Helpdesk Directory", authority: "NSSTA Greater Noida" }
+      ];
+
+      if (isRateLimited) {
+        errorMsg = "Rate limit notice: You are submitting questions quickly. Please wait a few seconds before asking your next question.";
+        sources = [];
+      } else if (isServerDown) {
+        errorMsg = "Connection notice: Unable to reach the STATWISE backend server on port 8000. Please ensure the server is active.";
+        sources = [];
+      }
+
       setMessages([...newMsgs, {
         id: `msg_${Date.now()}`,
         sender: "tutor",
-        text: "This query cannot be verified from approved MoSPI/NSSTA learning materials. To maintain statistical fidelity, the AI Tutor only provides source-backed answers. Please consult an official NSSTA reference document or contact a designated cadre trainer.",
-        sources: [
-          { title: "National Statistical Systems Training Academy (NSSTA) Reference Catalogue", page: "Helpdesk Directory", authority: "NSSTA Greater Noida" }
-        ],
+        text: errorMsg,
+        sources: sources,
         is_grounded: false,
         confidence: 0.0
       }]);
@@ -204,6 +221,40 @@ export function TutorView({ currentRole = "JSO", currentAssignment = "", onNavig
                   <div className="leading-relaxed whitespace-pre-wrap font-sans text-[12px]">
                     {m.text}
                   </div>
+
+                  {/* Contextual Action Buttons based on answer recommendations */}
+                  {m.sender === "tutor" && onNavigate && (
+                    <div className="pt-2 flex items-center gap-2 flex-wrap">
+                      {(m.text.includes("Learning Path") || m.text.includes("Roadmap") || m.text.includes("Pathway") || m.text.includes("Enrol")) && (
+                        <button
+                          onClick={() => onNavigate("pathway")}
+                          className="px-2.5 py-1 bg-statwise-navy text-white text-[11px] font-semibold rounded-md hover:bg-statwise-navyActive transition-all flex items-center gap-1 shadow-2xs"
+                        >
+                          <Compass className="w-3 h-3 text-amber-400" />
+                          <span>View Learning Path</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      )}
+                      {(m.text.includes("Virtual Lab") || m.text.includes("Microdata") || m.text.includes("Scrutiny Virtual Lab")) && (
+                        <button
+                          onClick={() => onNavigate("virtuallab")}
+                          className="px-2.5 py-1 bg-amber-600 text-white text-[11px] font-semibold rounded-md hover:bg-amber-700 transition-all flex items-center gap-1 shadow-2xs"
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          <span>Open Virtual Lab</span>
+                        </button>
+                      )}
+                      {(m.text.includes("Assessment") || m.text.includes("Quiz") || m.text.includes("assessment")) && (
+                        <button
+                          onClick={() => onNavigate("assessments")}
+                          className="px-2.5 py-1 bg-statwise-blue text-white text-[11px] font-semibold rounded-md hover:bg-statwise-blue/80 transition-all flex items-center gap-1 shadow-2xs"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Check Assessments</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {/* Grounded Source Citations */}
                   {m.sources && m.sources.length > 0 && (

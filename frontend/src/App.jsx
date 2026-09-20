@@ -74,17 +74,22 @@ export function App() {
       localStorage.setItem("statwise_saved_assignment", current_assignment || "");
 
       setCurrentRole(role_code);
-      await api.updateProfile({
-        full_name: name,
-        name: name,
-        department,
-        current_assignment,
-        role_code
-      });
+      try {
+        await api.updateProfile({
+          full_name: name,
+          name: name,
+          department,
+          current_assignment,
+          role_code
+        });
+      } catch (apiErr) {
+        console.warn("Backend profile update fallback:", apiErr);
+      }
       await refreshUserData();
       setShowIdentifyModal(false);
     } catch (err) {
       console.error("Failed to identify user:", err);
+      setShowIdentifyModal(false);
     }
   };
 
@@ -122,7 +127,9 @@ export function App() {
           {activeTab === "pathway" && (
             <LearningPathView
               learningPathData={learningPathData}
+              currentRole={currentRole}
               onNavigate={setActiveTab}
+              onRefreshData={refreshUserData}
             />
           )}
           {activeTab === "recommendations" && (
@@ -158,6 +165,7 @@ export function App() {
               learner={profileData?.learner}
               currentRole={currentRole}
               onRoleChange={handleRoleChange}
+              onProfileUpdated={refreshUserData}
             />
           )}
         </main>
