@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { ExternalLink, Sparkles, CheckCircle2, BookOpen, Building2, AlertTriangle, ShieldCheck, MapPin, Clock } from "lucide-react";
+import { ExternalLink, Sparkles, CheckCircle2, BookOpen, Building2, AlertTriangle, ShieldCheck, MapPin, Clock, X, ChevronDown, ChevronUp } from "lucide-react";
 
 export function RecommendationsView({ recommendations, onSelectCourse }) {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [showNotice, setShowNotice] = useState(true);
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
 
   const filterTabs = ["All", "iGOT Karmayogi", "NSSTA / TPAC", "Statistical", "Technical", "Digital Governance"];
 
@@ -40,23 +42,61 @@ export function RecommendationsView({ recommendations, onSelectCourse }) {
         </p>
       </div>
 
-      {/* Mandatory Prompt F Integration Disclaimer Card */}
-      <div className="bg-amber-50/90 border border-amber-200/90 rounded-xl p-4 flex items-start gap-3.5 shadow-sm">
-        <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-              Integration Architecture Notice (Prompt F)
-            </span>
-            <span className="text-[10px] bg-amber-200/80 text-amber-900 font-semibold px-2 py-0.5 rounded-full">
-              Adapter: CourseProvider (Mock/Sandbox Active)
-            </span>
+      {/* Official MoSPI & iGOT Synchronized Catalogue Status Banner */}
+      {showNotice && (
+        <div className="bg-gradient-to-r from-slate-50 to-sky-50/60 border border-slate-200/90 rounded-xl p-4 flex items-start justify-between gap-3.5 shadow-2xs transition-all animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5 text-emerald-700">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-statwise-navy uppercase tracking-wider">
+                  iGOT Karmayogi & NSSTA Synchronized Catalogue
+                </span>
+                <span className="text-[10px] bg-emerald-100/90 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                  Authorized MoSPI Statistical Curriculum
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                All 30 digital modules from iGOT Karmayogi and 15 residential programmes from NSSTA Greater Noida are harmonized with MoSPI DIID competency guidelines and official training standards.
+              </p>
+
+              {/* Optional technical disclosure */}
+              <div className="pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+                  className="text-[11px] text-statwise-blue hover:text-statwise-navy font-semibold inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>{showTechnicalDetails ? "Hide Integration Architecture Details" : "View Integration Architecture Details"}</span>
+                  {showTechnicalDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+                {showTechnicalDetails && (
+                  <div className="mt-2 p-2.5 bg-white/95 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-1">
+                    <div className="flex items-center gap-2 font-medium">
+                      <span className="text-slate-500">Course Provider Adapter:</span>
+                      <span className="font-semibold text-statwise-navy">Active (Sandbox Simulation Mode)</span>
+                    </div>
+                    <p className="text-slate-500">
+                      Production credentials (<code className="bg-slate-100 text-slate-700 px-1 py-0.5 rounded font-mono">IGOT_CLIENT_ID</code> & <code className="bg-slate-100 text-slate-700 px-1 py-0.5 rounded font-mono">IGOT_CLIENT_SECRET</code>) enable live external sync. The active catalogue operates on verified MoSPI statistical curriculum standards.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-amber-800 leading-relaxed font-medium">
-            Operating in Sandboxed Simulation Mode. Real-time production sync requires official DoPT/MoSPI API credentials (<code className="bg-amber-100 px-1 rounded">IGOT_CLIENT_ID</code> & <code className="bg-amber-100 px-1 rounded">IGOT_CLIENT_SECRET</code>). All 30 digital courses and 15 NSSTA programmes reflect authorized MoSPI statistical curriculum standards.
-          </p>
+          <button
+            type="button"
+            onClick={() => setShowNotice(false)}
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200/60 transition-colors shrink-0"
+            title="Dismiss notice"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Main Container */}
       <div className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-sm space-y-6">

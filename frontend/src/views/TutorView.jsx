@@ -129,7 +129,7 @@ export function TutorView({ currentRole = "JSO", currentAssignment = "", onNavig
             Official Statistics AI Tutor
           </h2>
           <p className="text-sm text-statwise-muted mt-0.5">
-            Retrieval-Augmented Generation (RAG) strictly grounded in approved NSSTA and MoSPI training materials (Prompt O).
+            Retrieval-Augmented Generation (RAG) strictly grounded in approved NSSTA and MoSPI training materials.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
